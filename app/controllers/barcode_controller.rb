@@ -4,13 +4,18 @@ class BarcodeController < ApplicationController
   #   # TODO : DOCUMENT + flesh out implementation
   def show
     barcode = params[:barcode]
-    render plain: "Barcode #{barcode} is not valid.", status: :bad_request if !valid_barcode(barcode)
+    return render_not_found barcode if !valid_barcode(barcode)
     puts "we are in the show action! got the barcode #{barcode}"
     response = erics_script(barcode)
+    return render_not_found barcode if response == nil
     render xml: response
   end
 
-  private
+  private ######################################################################
+
+  def render_not_found(barcode)
+    render plain: "Barcode #{barcode} was not found.", status: :not_found
+  end
 
   # TODO: implement
   def valid_barcode(barcode)
