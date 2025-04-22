@@ -11,7 +11,7 @@ RSpec.describe "Barcodes", type: :request do
       get "/barcode/#{test_barcode}"
       expect(response).to have_http_status(:ok)
       expect(response.content_type).to eq("application/xml; charset=utf-8")
-      expect(response.content).to eq(test_xml)
+      expect(response.body).to eq(test_xml)
     end
 
     it "returns Not Found code with bad request" do
