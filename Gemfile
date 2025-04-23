@@ -30,6 +30,8 @@ gem "thruster", require: false
 # ruby-marc library [https://github.com/ruby-marc/ruby-marc]
 gem "marc"
 
+gem "nokogiri", "~> 1.17.2"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
@@ -41,4 +43,13 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
 
   gem "rspec-rails", "~>7.0.0"
+end
+
+group :development do
+  # Capistrano for deployment (per https://capistranorb.com/documentation/getting-started/installation/)
+  gem "capistrano", "~> 3.19.2", require: false
+  # common set of tasks shared across cul apps
+  gem "capistrano-cul", require: false 
+  gem "capistrano-rails", "~> 1.4", require: false # for compiling rails assets
+  gem "capistrano-passenger", "~> 0.1", require: false # allows restart passenger workers
 end
