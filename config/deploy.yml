@@ -1,3 +1,5 @@
+# ignore this file for now
+
 # Name of your application. Used to uniquely configure containers.
 service: bibdata
 
