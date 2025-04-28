@@ -31,9 +31,14 @@
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 
+# Ignore config files
+/config/folio.yml
+
 # Custom gitignore directives here vvvvvvv
 example.mrc
 
 # macOS Files
 .DS_Store
 
+# Local rake tasks
+local.rake

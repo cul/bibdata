@@ -28,9 +28,16 @@ gem "thruster", require: false
 # gem "rack-cors"
 
 # ruby-marc library [https://github.com/ruby-marc/ruby-marc]
-gem "marc"
+gem "marc", "~> 1.3"
 
 gem "nokogiri", "~> 1.17.2"
+
+# Rainbow for text coloring
+gem "rainbow", "~> 3.0"
+
+# FOLIO Client
+# gem "folio_api_client", "~> 0.1.0", path: "../folio_api_client"
+gem "folio_api_client", github: "cul/folio_api_client", branch: "main"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
