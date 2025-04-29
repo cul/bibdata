@@ -1,3 +1,3 @@
 # bibdata
-Get a barcode, returnarchival metadata (MARC XML)
+Get a barcode, return archival metadata (MARC XML)
 
