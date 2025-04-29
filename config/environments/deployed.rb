@@ -1,3 +1,4 @@
+# deployed.rb is for shared configuration -- it is loaded by each env config file
 # This is copied from the rails generated environments/production.rb file
 # bibdata_dev.rn and bibdata_prod.rb are identical at the moment.
 require "active_support/core_ext/integer/time"
