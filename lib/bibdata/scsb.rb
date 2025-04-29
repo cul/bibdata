@@ -9,8 +9,8 @@ module Bibdata::Scsb
 
     # The enrichment steps below are based on:
     # https://github.com/pulibrary/bibdata/blob/3e8888ce06944bb0fd0e3da7c13f603edf3d45a5/app/controllers/barcode_controller.rb#L25
-    enrich_with_item(marc_record, item_record, holdings_record["hrid"])
-    enrich_with_holding(marc_record, holdings_record, location_record)
+    enrich_with_item!(marc_record, item_record, holdings_record["hrid"])
+    enrich_with_holding!(marc_record, holdings_record, location_record)
     strip_non_numeric!(marc_record)
 
     marc_record
@@ -49,7 +49,7 @@ module Bibdata::Scsb
     end
   end
 
-  def self.enrich_with_holding(marc_record, folio_holdings_record, item_location_record)
+  def self.enrich_with_holding!(marc_record, folio_holdings_record, item_location_record)
     delete_conflicting_holdings_data!(marc_record)
     marc_record.fields.concat(
       [
@@ -76,13 +76,12 @@ module Bibdata::Scsb
   # Based on:
   # https://github.com/pulibrary/bibdata/blob/4bcb0562fd9944266df834299ec4340cd3567a57/app/adapters/alma_adapter/marc_record.rb#L31
   # https://github.com/pulibrary/bibdata/blob/4bcb0562fd9944266df834299ec4340cd3567a57/app/adapters/alma_adapter/alma_item.rb#L74
-  def self.enrich_with_item(marc_record, folio_item_record, holdings_record_id)
+  def self.enrich_with_item!(marc_record, folio_item_record, holdings_record_id)
     # Delete 876 field if present because we are going to generate our own
     marc_record.fields.delete_if { |f| f.tag == "876" }
     marc_record.fields.concat([
       MARC::DataField.new("876", "0", "0", *subfields_for_876(folio_item_record, holdings_record_id))
     ])
-    marc_record
   end
 
   # Based on:
