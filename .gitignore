@@ -34,9 +34,6 @@
 # Ignore config files
 /config/folio.yml
 
-# Custom gitignore directives here vvvvvvv
-example.mrc
-
 # macOS Files
 .DS_Store
 
