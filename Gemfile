@@ -36,7 +36,7 @@ gem "nokogiri", "~> 1.17.2"
 gem "rainbow", "~> 3.0"
 
 # FOLIO Client
-gem "folio_api_client", "~> 0.1.0"
+gem "folio_api_client", "~> 0.2.0"
 # gem "folio_api_client", "~> 0.1.0", path: "../folio_api_client"
 # gem "folio_api_client", github: "cul/folio_api_client", branch: "main"
 
