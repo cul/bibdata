@@ -1,15 +1,74 @@
 module Bibdata::Scsb
+  CGD_PRIVATE = "Private"
+  CGD_SHARED = "Shared"
+  CGD_OPEN = "Open" # NOTE: we don't actually ever send this value
+
+  CGD_PRIVATE_LOCATION_CODES = [
+    "avda",
+    "off,avda",
+    "avr4off",
+    "bmcr4off",
+    "off,bmcr",
+    "off,avr",
+    "off,bssc",
+    "dic",
+    "dic4off",
+    "off,dic",
+    "eaa4off",
+    "off,eaa",
+    "ean",
+    "off,ean",
+    "ear",
+    "off,ear",
+    "far",
+    "far4off",
+    "off,far",
+    "off,hssc",
+    "hsx",
+    "off,hsx",
+    "les",
+    "off,les",
+    "oral",
+    "off,oral",
+    "prd",
+    "off,prd",
+    "rbms",
+    "off,rbms",
+    "rbx",
+    "rbx4off",
+    "off,rbx",
+    "uacl",
+    "off,uacl",
+    "unr",
+    "off,unr",
+    "uta",
+    "off,uta",
+    "utmrl",
+    "off,utrml",
+    "vmc",
+    "off,vmc"
+  ]
+
+  CGD_PRIVATE_BARCODE_PREFIXES = [
+    "RS",
+    "AD",
+    "HX",
+    "UA",
+    "UT"
+  ]
+
   def self.merged_marc_record_for_barcode(barcode)
     item_record = Bibdata::FolioApiClient.instance.find_item_record(barcode: barcode)
     return nil if item_record.nil?
     location_record = Bibdata::FolioApiClient.instance.find_location_record(location_id: item_record["permanentLocationId"])
+    # loan_type_record = Bibdata::FolioApiClient.instance.find_loan_type_record(loan_type_id: item_record["permanentLoanTypeId"])
     holdings_record = Bibdata::FolioApiClient.instance.find_holdings_record(holdings_record_id: item_record["holdingsRecordId"])
     # instance_record = Bibdata::FolioApiClient.instance.find_instance_record(instance_record_id: holdings_record["instanceId"])
     marc_record = Bibdata::FolioApiClient.instance.find_marc_record(instance_record_id: holdings_record["instanceId"])
 
     # The enrichment steps below are based on:
     # https://github.com/pulibrary/bibdata/blob/3e8888ce06944bb0fd0e3da7c13f603edf3d45a5/app/controllers/barcode_controller.rb#L25
-    enrich_with_item!(marc_record, item_record, holdings_record["hrid"])
+    enrich_with_item!(marc_record, item_record, location_record, holdings_record["hrid"])
     enrich_with_holding!(marc_record, holdings_record, location_record)
     strip_non_numeric!(marc_record)
 
@@ -76,17 +135,17 @@ module Bibdata::Scsb
   # Based on:
   # https://github.com/pulibrary/bibdata/blob/4bcb0562fd9944266df834299ec4340cd3567a57/app/adapters/alma_adapter/marc_record.rb#L31
   # https://github.com/pulibrary/bibdata/blob/4bcb0562fd9944266df834299ec4340cd3567a57/app/adapters/alma_adapter/alma_item.rb#L74
-  def self.enrich_with_item!(marc_record, folio_item_record, holdings_record_id)
+  def self.enrich_with_item!(marc_record, folio_item_record, folio_location_record, holdings_record_id)
     # Delete 876 field if present because we are going to generate our own
     marc_record.fields.delete_if { |f| f.tag == "876" }
     marc_record.fields.concat([
-      MARC::DataField.new("876", "0", "0", *subfields_for_876(folio_item_record, holdings_record_id))
+      MARC::DataField.new("876", "0", "0", *subfields_for_876(folio_item_record, folio_location_record, holdings_record_id))
     ])
   end
 
   # Based on:
   # https://github.com/pulibrary/bibdata/blob/4bcb0562fd9944266df834299ec4340cd3567a57/app/adapters/alma_adapter/alma_item.rb#L81
-  def self.subfields_for_876(folio_item_record, holdings_record_id)
+  def self.subfields_for_876(folio_item_record, folio_location_record, holdings_record_id)
     # TODO: Find an example item record with enumeration and chronology to make sure these values are coming through.
     item_enumeration_and_chronology = [ folio_item_record["enumeration"], folio_item_record["chronology"] ].compact.join(" ")
 
@@ -96,46 +155,51 @@ module Bibdata::Scsb
       MARC::Subfield.new("a", folio_item_record["hrid"]),
       MARC::Subfield.new("p", folio_item_record["barcode"]),
       MARC::Subfield.new("t", folio_item_record["copyNumber"] || "0")
-    ] + recap_876_fields(folio_item_record)
+    ] + recap_876_fields(folio_item_record, folio_location_record)
+  end
+
+  def self.collection_group_designation_for_item(folio_item_record, folio_location_record)
+    location_code = folio_location_record["code"]
+    barcode = folio_item_record["barcode"]
+    return CGD_PRIVATE if CGD_PRIVATE_LOCATION_CODES.include?(location_code)
+    return CGF_PRIVATE if CGD_PRIVATE_BARCODE_PREFIXES.include?(barcode)
+    CGD_SHARED
   end
 
   # Based on:
   # https://github.com/pulibrary/bibdata/blob/4bcb0562fd9944266df834299ec4340cd3567a57/app/adapters/alma_adapter/alma_item.rb#L91
-  def self.recap_876_fields(folio_item_record)
-    # h, x, z, l ("L")
+  def self.recap_876_fields(folio_item_record, folio_location_record)
+    collection_group_designation = collection_group_designation_for_item(folio_item_record, folio_location_record)
 
-    # The only field from the set below that the current CUL app uses is 'j'
+    # Use Restriction value is determined by CGD (Collection Use Designation) value
+    use_restriction = case collection_group_designation
+    when CGD_PRIVATE
+      "Supervised use"
+    when CGD_OPEN, CGD_SHARED
+      "" # Blank value
+    end
+
     [
-      # $h : Use Restriction - value supplied by ILS at the time of accession. This is defined by the partners as to how their items are to be handled and
-      # if they need special care on how it is being lent to patrons. Possible values are:
-      #   Blank - This implies no restrictions. To further elaborate, blank would mean the <876> tag and the $h sub tag are present but blank.
-      #   In Library Use. This would mean the item cannot be taken out of the library.
-      #   Supervised Use. This might mean the item can be accessed only with special equipment in a specialized room under supervision.
-      # TODO: Is this needed for our case?  Not currently sent by existing Voyager-based CUL SCSB endpoint.
-      #       If this should be sent, ask CUL where to get this field.
-      # MARC::Subfield.new('h', recap_use_restriction), # recap use restriction
-
-      # $x : Collection Group Designation -  The CGD is a designation given to an item by the partner institutions.
-      # A private item will remain accessible only to patrons of the owning institution whereas the open and shared
-      # designated items are available to be accessed by patrons of all partner institutions. The designation also
-      # changes based on certain criteria defined under the matching algorithm rules. <900> $a in SCSB Schema.
+      # $x : Collection Group Designation -  The CGD is a designation given to an item by the partner institutions.  A private item will remain accessible only to patrons of the owning institution whereas the open and shared.  Designated items are available to be accessed by patrons of all partner institutions. The designation also changes based on certain criteria defined under the matching algorithm rules. <900> $a in SCSB Schema.
       # Possible values are:
-      #   Open
-      #   Shared
-      #   Private
-      # TODO: Is this needed for our case?  Not currently sent by existing Voyager-based CUL SCSB endpoint.
-      #       If this should be sent, ask CUL where to get this field.
-      # MARC::Subfield.new('x', group_designation), # group designation
+      # - Private
+      # - Shared
+      # - Open (we always supply "Shared" for Open cases, and allow the SCSB system to change it to "Open" automatically when more than one copy of an item is held)
+      # - Committed (not something we use at this time)
+      # - Uncommittable (not something we use at this time)
+      MARC::Subfield.new("x", collection_group_designation),
 
-      # $z : Customer Code - value supplied by ILS. <900> $b in SCSB schema.
-      # TODO: Is this needed for our case?  Not currently sent by existing Voyager-based CUL SCSB endpoint.
-      #       If this should be sent, ask CUL where to get this field.
-      # MARC::Subfield.new('z', recap_customer_code), # recap customer code
+      # $h : Use Restriction - A value supplied by ILS at the time of accession. This is defined by the partners as to how their items are to be handled and if they need special care on how it is being lent to patrons.
+      # Possible values are:
+      # - Supervised Use - This might mean the item can be accessed only with special equipment in a specialized room under supervision.
+      # - In Library Use - This would mean the item cannot be taken out of the library.
+      # - Blank - This implies no restrictions. To further elaborate, blank would mean the <876> field and the $h subfield are present but blank.
+      MARC::Subfield.new("h", use_restriction),
 
-      MARC::Subfield.new("j", folio_item_record["status"]["name"]), # recap status
+      # ReCAP status
+      MARC::Subfield.new("j", folio_item_record["status"]["name"]),
 
-      # $l : IMS Location Code - value supplied by ILS
-      # Confirm whether this is needed, and if it should always be RECAP for our use case.
+      # $l : IMS Location Code
       MARC::Subfield.new("l", "RECAP")
     ]
   end
