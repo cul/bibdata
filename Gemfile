@@ -36,7 +36,7 @@ gem "nokogiri", "~> 1.17.2"
 gem "rainbow", "~> 3.0"
 
 # FOLIO Client
-gem "folio_api_client", "~> 0.3.0"
+gem "folio_api_client", "~> 0.4.0"
 # gem "folio_api_client", path: "../folio_api_client"
 
 group :development, :test do

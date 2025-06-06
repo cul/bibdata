@@ -64,7 +64,8 @@ module Bibdata::Scsb
     # loan_type_record = Bibdata::FolioApiClient.instance.find_loan_type_record(loan_type_id: item_record["permanentLoanTypeId"])
     holdings_record = Bibdata::FolioApiClient.instance.find_holdings_record(holdings_record_id: item_record["holdingsRecordId"])
     # instance_record = Bibdata::FolioApiClient.instance.find_instance_record(instance_record_id: holdings_record["instanceId"])
-    marc_record = Bibdata::FolioApiClient.instance.find_marc_record(instance_record_id: holdings_record["instanceId"])
+    source_record = Bibdata::FolioApiClient.instance.find_source_record(instance_record_id: holdings_record["instanceId"])
+    marc_record = MARC::Record.new_from_hash(source_record["parsedRecord"]["content"])
 
     # The enrichment steps below are based on:
     # https://github.com/pulibrary/bibdata/blob/3e8888ce06944bb0fd0e3da7c13f603edf3d45a5/app/controllers/barcode_controller.rb#L25
