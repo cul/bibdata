@@ -36,7 +36,7 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby-version }}
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - name: Set up config files
-        run: bundle exec rake bibdata:setup:config_files
+      - name: Copy config files
+        run: bin/copy-config-template-files
       - name: Run CI task
         run: bundle exec rake bibdata:ci

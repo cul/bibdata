@@ -16,10 +16,10 @@ namespace :bibdata do
   end
 
   desc "CI build without rubocop"
-  task ci_nocop: [ "bibdata:setup:config_files", :environment, "bibdata:ci_specs" ]
+  task ci_nocop: [ :environment, "bibdata:ci_specs" ]
 
   desc "CI build with Rubocop validation"
-  task ci: [ "bibdata:setup:config_files", :environment, "bibdata:rubocop", "bibdata:ci_specs" ]
+  task ci: [ :environment, "bibdata:rubocop", "bibdata:ci_specs" ]
 
   desc "CI build just running specs"
   task ci_specs: :environment do
