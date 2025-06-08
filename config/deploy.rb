@@ -5,12 +5,9 @@
 # config valid for current version and patch releases of Capistrano
 lock "~> 3.19.2"
 
-# Until we retire all old CentOS VMs, we need to set the rvm_custom_path because rvm is installed
-# in a non-standard location for our AlmaLinux VMs.  This is because our service accounts need to
-# maintain two rvm installations for two different Linux OS versions.
-set :rvm_custom_path, "~/.rvm-alma8"                      # default ~/.rvm
+set :rvm_custom_path, "~/.rvm"
 
-set :remote_user, "renserv"
+set :remote_user, "litoserv"
 set :application, "bibdata"
 set :repo_name, fetch(:application)
 set :repo_url, "git@github.com:cul/#{fetch(:repo_name)}.git"

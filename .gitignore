@@ -39,3 +39,6 @@
 
 # Local rake tasks
 local.rake
+
+# Ignore SimpleCov files
+/coverage

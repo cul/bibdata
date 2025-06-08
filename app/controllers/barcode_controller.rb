@@ -7,7 +7,7 @@ class BarcodeController < ApplicationController
   def show
     barcode = params[:barcode] # Example: 'CU23392169'
     return render_not_found barcode if !valid_barcode(barcode)
-    puts "we are in the show action! got the barcode #{barcode}"
+
     xml = Bibdata::Scsb.merged_marc_collection_xml_for_barcode(barcode)
     return render_not_found barcode if xml.nil?
 
