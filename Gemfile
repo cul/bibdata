@@ -52,6 +52,8 @@ group :development, :test do
   gem "rubocop-rspec"
 
   gem "rspec-rails", "~>7.0.0"
+
+  gem "simplecov", require: false
 end
 
 group :development do
