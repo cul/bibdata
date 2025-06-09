@@ -1,9 +1,9 @@
 GIT
   remote: https://github.com/cul/folio_api_client.git
-  revision: 789b488cac64eb7394cf50a82f06ed8d0e5c3262
+  revision: 9093f6bd14eebfd5d3e0a28f8fe13a30ca36e3d4
   branch: main
   specs:
-    folio_api_client (0.1.0)
+    folio_api_client (0.4.0)
       faraday (~> 2.13)
       marc (~> 1.3)
       zeitwerk (~> 2.7)
@@ -143,7 +143,7 @@ GEM
       pp (>= 0.6.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
-    json (2.11.3)
+    json (2.12.2)
     kamal (2.5.3)
       activesupport (>= 7.0)
       base64 (~> 0.2)
@@ -333,7 +333,7 @@ GEM
       base64
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
-    zeitwerk (2.7.2)
+    zeitwerk (2.7.3)
 
 PLATFORMS
   aarch64-linux
