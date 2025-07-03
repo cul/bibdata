@@ -60,7 +60,12 @@ module Bibdata::Scsb
   def self.merged_marc_record_for_barcode(barcode)
     item_record = Bibdata::FolioApiClient.instance.find_item_record(barcode: barcode)
     return nil if item_record.nil?
-    location_record = Bibdata::FolioApiClient.instance.find_location_record(location_id: item_record["permanentLocationId"])
+    location_record = begin
+      Bibdata::FolioApiClient.instance.find_location_record(location_id: item_record["permanentLocationId"])
+    rescue Faraday::ResourceNotFound
+      nil
+    end
+
     # loan_type_record = Bibdata::FolioApiClient.instance.find_loan_type_record(loan_type_id: item_record["permanentLoanTypeId"])
     holdings_record = Bibdata::FolioApiClient.instance.find_holdings_record(holdings_record_id: item_record["holdingsRecordId"])
     # instance_record = Bibdata::FolioApiClient.instance.find_instance_record(instance_record_id: holdings_record["instanceId"])
@@ -124,12 +129,18 @@ module Bibdata::Scsb
   # https://github.com/pulibrary/bibdata/blob/4bcb0562fd9944266df834299ec4340cd3567a57/app/adapters/alma_adapter/alma_item.rb#L74
   def self.generate_852(folio_holdings_record, item_location_record)
     location_classification_part, location_item_part = folio_holdings_record["callNumber"].split(" ", 2)
-    MARC::DataField.new(
-      "852", "0", "0",
+    item_location_record_code = item_location_record&.fetch("code")
+
+    subfields = [
       MARC::Subfield.new("0", folio_holdings_record["hrid"]),
-      MARC::Subfield.new("b", item_location_record["code"]), # Location code
+      item_location_record_code ? MARC::Subfield.new("b", item_location_record_code) : nil, # Location code
       MARC::Subfield.new("h", location_classification_part), # Location classification part (from call number)
       MARC::Subfield.new("i", location_item_part)
+    ].compact
+
+    MARC::DataField.new(
+      "852", "0", "0",
+      *subfields
     )
   end
 
@@ -160,7 +171,7 @@ module Bibdata::Scsb
   end
 
   def self.collection_group_designation_for_item(folio_item_record, folio_location_record)
-    location_code = folio_location_record["code"]
+    location_code = folio_location_record&.fetch("code")
     barcode = folio_item_record["barcode"]
     return CGD_PRIVATE if CGD_PRIVATE_LOCATION_CODES.include?(location_code)
     return CGF_PRIVATE if CGD_PRIVATE_BARCODE_PREFIXES.include?(barcode)
