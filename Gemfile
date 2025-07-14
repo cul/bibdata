@@ -36,8 +36,8 @@ gem "nokogiri", "~> 1.17.2"
 gem "rainbow", "~> 3.0"
 
 # FOLIO Client
-# gem "folio_api_client", "~> 0.1.0", path: "../folio_api_client"
-gem "folio_api_client", github: "cul/folio_api_client", branch: "main"
+gem "folio_api_client", "~> 0.4.0"
+# gem "folio_api_client", path: "../folio_api_client"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -46,10 +46,14 @@ group :development, :test do
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
   gem "brakeman", require: false
 
+  # TODO: Swap rubocop gems below with rubocul
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+  gem "rubocop-rspec"
 
   gem "rspec-rails", "~>7.0.0"
+
+  gem "simplecov", require: false
 end
 
 group :development do

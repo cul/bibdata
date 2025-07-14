@@ -6,7 +6,7 @@ RSpec.describe "Barcodes", type: :request do
     let(:test_xml) { "<record><title>Test Title</title></record>" }
 
     it "returns XML and OK response" do
-      allow_any_instance_of(BarcodeController).to receive(:erics_script).with(test_barcode).and_return(test_xml)
+      expect(Bibdata::Scsb).to receive(:merged_marc_collection_xml_for_barcode).and_return(test_xml)
 
       get "/barcode/#{test_barcode}"
       expect(response).to have_http_status(:ok)
@@ -15,7 +15,7 @@ RSpec.describe "Barcodes", type: :request do
     end
 
     it "returns Not Found code with bad request" do
-      allow_any_instance_of(BarcodeController).to receive(:erics_script).with(test_barcode).and_return(nil)
+      expect(Bibdata::Scsb).to receive(:merged_marc_collection_xml_for_barcode).and_return(nil)
 
       get "/barcode/#{test_barcode}"
       expect(response).to have_http_status(:not_found)
