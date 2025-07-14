@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# ^ at the top of every rb file
-
 # config valid for current version and patch releases of Capistrano
 lock "~> 3.19.2"
 
