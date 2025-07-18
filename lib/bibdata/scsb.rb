@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Bibdata::Scsb
   CGD_PRIVATE = 'Private'
   CGD_SHARED = 'Shared'
@@ -47,7 +49,7 @@ module Bibdata::Scsb
     'off,utrml',
     'vmc',
     'off,vmc'
-  ]
+  ].freeze
 
   CGD_PRIVATE_BARCODE_PREFIXES = [
     'RS',
@@ -55,7 +57,7 @@ module Bibdata::Scsb
     'HX',
     'UA',
     'UT'
-  ]
+  ].freeze
 
   USE_RESTRICTION_IN_LIBRARY_USE = 'In Library Use'
   USE_RESTRICTION_SUPERVISED_USE = 'Supervised Use'
@@ -68,23 +70,35 @@ module Bibdata::Scsb
     'off,mrr',
     'off,msr',
     'off,mvr'
-  ]
+  ].freeze
 
-  def self.merged_marc_record_for_barcode(barcode)
-    item_record = Bibdata::FolioApiClient.instance.find_item_record(barcode: barcode)
-
-    return nil if item_record.nil?
-
+  def self.fetch_folio_records_associated_with_item(item_record)
     location_record = begin
       Bibdata::FolioApiClient.instance.find_location_record(location_id: item_record['permanentLocationId'])
     rescue Faraday::ResourceNotFound
       nil
     end
 
-    # loan_type_record = Bibdata::FolioApiClient.instance.find_loan_type_record(loan_type_id: item_record["permanentLoanTypeId"])
-    holdings_record = Bibdata::FolioApiClient.instance.find_holdings_record(holdings_record_id: item_record['holdingsRecordId'])
-    # instance_record = Bibdata::FolioApiClient.instance.find_instance_record(instance_record_id: holdings_record["instanceId"])
-    source_record = Bibdata::FolioApiClient.instance.find_source_record(instance_record_id: holdings_record['instanceId'])
+    holdings_record = Bibdata::FolioApiClient.instance.find_holdings_record(
+      holdings_record_id: item_record['holdingsRecordId']
+    )
+
+    source_record = Bibdata::FolioApiClient.instance.find_source_record(
+      instance_record_id: holdings_record['instanceId']
+    )
+
+    {
+      location_record: location_record,
+      holdings_record: holdings_record,
+      source_record: source_record
+    }
+  end
+
+  def self.merged_marc_record_for_barcode(barcode)
+    item_record = Bibdata::FolioApiClient.instance.find_item_record(barcode: barcode)
+    return nil if item_record.nil?
+
+    fetch_folio_records_associated_with_item(item_record) => { location_record:, holdings_record:, source_record: }
     marc_record = MARC::Record.new_from_hash(source_record['parsedRecord']['content'])
 
     # The enrichment steps below are based on:
@@ -142,8 +156,6 @@ module Bibdata::Scsb
     marc_record.fields.concat(
       [
         generate_852(folio_holdings_record, item_location_record)
-        # 866 field is optional for SCSB, and wasn't being sent before in CUL Voyager endpoint, so we'll skip this for now
-        # generate_866(folio_holdings_record, item_location_record),
       ].flatten.compact
     )
   end
@@ -173,10 +185,14 @@ module Bibdata::Scsb
   def self.enrich_with_item!(marc_record, folio_item_record, item_location_record, holdings_record_id)
     # Delete 876 field if present because we are going to generate our own
     marc_record.fields.delete_if { |f| f.tag == '876' }
-    marc_record.fields.concat([
-                                MARC::DataField.new('876', '0', '0',
-                                                    *subfields_for_876(folio_item_record, item_location_record, holdings_record_id))
-                              ])
+    marc_record.fields.concat(
+      [
+        MARC::DataField.new(
+          '876', '0', '0',
+          *subfields_for_876(folio_item_record, item_location_record, holdings_record_id)
+        )
+      ]
+    )
   end
 
   # Based on:
@@ -223,20 +239,30 @@ module Bibdata::Scsb
     end
 
     [
-      # $x : Collection Group Designation -  The CGD is a designation given to an item by the partner institutions.  A private item will remain accessible only to patrons of the owning institution whereas the open and shared.  Designated items are available to be accessed by patrons of all partner institutions. The designation also changes based on certain criteria defined under the matching algorithm rules. <900> $a in SCSB Schema.
+      # $x : Collection Group Designation -  The CGD is a designation given to an item by the partner institutions.
+      #                                      A private item will remain accessible only to patrons of the owning
+      #                                      institution whereas the open and shared.  Designated items are available
+      #                                      to be accessed by patrons of all partner institutions. The designation
+      #                                      also changes based on certain criteria defined under the matching algorithm
+      #                                      rules. <900> $a in SCSB Schema.
       # Possible values are:
       # - Private
       # - Shared
-      # - Open (we always supply "Shared" for Open cases, and allow the SCSB system to change it to "Open" automatically when more than one copy of an item is held)
+      # - Open (we always supply "Shared" for Open cases, and allow the SCSB system to change it to "Open" automatically
+      #   when more than one copy of an item is held)
       # - Committed (not something we use at this time)
       # - Uncommittable (not something we use at this time)
       MARC::Subfield.new('x', collection_group_designation),
 
-      # $h : Use Restriction - A value supplied by ILS at the time of accession. This is defined by the partners as to how their items are to be handled and if they need special care on how it is being lent to patrons.
+      # $h : Use Restriction - A value supplied by ILS at the time of accession. This is defined by the partners as to
+      #                        how their items are to be handled and if they need special care on how it is being lent
+      #                        to patrons.
       # Possible values are:
-      # - Supervised Use - This might mean the item can be accessed only with special equipment in a specialized room under supervision.
+      # - Supervised Use - This might mean the item can be accessed only with special equipment in
+      #                    a specialized room under supervision.
       # - In Library Use - This would mean the item cannot be taken out of the library.
-      # - Blank - This implies no restrictions. To further elaborate, blank would mean the <876> field and the $h subfield are present but blank.
+      # - Blank - This implies no restrictions. To further elaborate, blank would mean the <876> field and the $h
+      #           subfield are present but blank.
       MARC::Subfield.new('h', use_restriction),
 
       # ReCAP status

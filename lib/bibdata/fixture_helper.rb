@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Bibdata::FixtureHelper
   def self.write_records_to_fixture_dir(barcode, item_record, location_record, holdings_record, source_record,
                                         generated_scsb_marc_xml_string)
