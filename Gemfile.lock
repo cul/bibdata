@@ -286,6 +286,15 @@ GEM
     rubocop-ast (1.44.1)
       parser (>= 3.3.7.2)
       prism (~> 1.4)
+    rubocop-capybara (2.22.1)
+      lint_roller (~> 1.1)
+      rubocop (~> 1.72, >= 1.72.1)
+    rubocop-factory_bot (2.27.1)
+      lint_roller (~> 1.1)
+      rubocop (~> 1.72, >= 1.72.1)
+    rubocop-graphql (1.5.6)
+      lint_roller (~> 1.1)
+      rubocop (>= 1.72.1, < 2)
     rubocop-performance (1.25.0)
       lint_roller (~> 1.1)
       rubocop (>= 1.75.0, < 2.0)
@@ -296,13 +305,18 @@ GEM
       rack (>= 1.1)
       rubocop (>= 1.75.0, < 2.0)
       rubocop-ast (>= 1.38.0, < 2.0)
-    rubocop-rails-omakase (1.1.0)
-      rubocop (>= 1.72)
-      rubocop-performance (>= 1.24)
-      rubocop-rails (>= 2.30)
     rubocop-rspec (3.6.0)
       lint_roller (~> 1.1)
       rubocop (~> 1.72, >= 1.72.1)
+    rubocul (4.0.11)
+      rubocop (~> 1.26)
+      rubocop-ast
+      rubocop-capybara
+      rubocop-factory_bot
+      rubocop-graphql
+      rubocop-performance
+      rubocop-rails
+      rubocop-rspec
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
     simplecov (0.22.0)
@@ -367,8 +381,7 @@ DEPENDENCIES
   rails (~> 8.0.2)
   rainbow (~> 3.0)
   rspec-rails (~> 7.0.0)
-  rubocop-rails-omakase
-  rubocop-rspec
+  rubocul (~> 4.0.3)
   simplecov
   thruster
   tzinfo-data

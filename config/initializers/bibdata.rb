@@ -1,1 +1,1 @@
-VERSION = File.read("VERSION")
+VERSION = File.read('VERSION')

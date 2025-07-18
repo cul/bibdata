@@ -6,7 +6,7 @@ class BarcodeController < ApplicationController
   #   # TODO : DOCUMENT + flesh out implementation
   def show
     barcode = params[:barcode] # Example: 'CU23392169'
-    return render_not_found barcode if !valid_barcode(barcode)
+    return render_not_found barcode unless valid_barcode(barcode)
 
     xml = Bibdata::Scsb.merged_marc_collection_xml_for_barcode(barcode)
     return render_not_found barcode if xml.nil?
@@ -21,7 +21,7 @@ class BarcodeController < ApplicationController
   end
 
   # TODO: implement
-  def valid_barcode(barcode)
+  def valid_barcode(_barcode)
     true
   end
 end
