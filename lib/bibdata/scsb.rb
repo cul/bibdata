@@ -57,6 +57,19 @@ module Bibdata::Scsb
     "UT"
   ]
 
+  USE_RESTRICTION_IN_LIBRARY_USE = "In Library Use"
+  USE_RESTRICTION_SUPERVISED_USE = "Supervised Use"
+  USE_RESTRICTION_BLANK = ""
+
+  # Any code in this list should result in an "In Library Use" Use Restriction value.
+  USE_RESTRICTION_IN_LIBRARY_USE_LOCATION_CODES = [
+    "off,ave",
+    "off,fax",
+    "off,mrr",
+    "off,msr",
+    "off,mvr"
+  ]
+
   def self.merged_marc_record_for_barcode(barcode)
     item_record = Bibdata::FolioApiClient.instance.find_item_record(barcode: barcode)
     return nil if item_record.nil?
@@ -147,17 +160,17 @@ module Bibdata::Scsb
   # Based on:
   # https://github.com/pulibrary/bibdata/blob/4bcb0562fd9944266df834299ec4340cd3567a57/app/adapters/alma_adapter/marc_record.rb#L31
   # https://github.com/pulibrary/bibdata/blob/4bcb0562fd9944266df834299ec4340cd3567a57/app/adapters/alma_adapter/alma_item.rb#L74
-  def self.enrich_with_item!(marc_record, folio_item_record, folio_location_record, holdings_record_id)
+  def self.enrich_with_item!(marc_record, folio_item_record, item_location_record, holdings_record_id)
     # Delete 876 field if present because we are going to generate our own
     marc_record.fields.delete_if { |f| f.tag == "876" }
     marc_record.fields.concat([
-      MARC::DataField.new("876", "0", "0", *subfields_for_876(folio_item_record, folio_location_record, holdings_record_id))
+      MARC::DataField.new("876", "0", "0", *subfields_for_876(folio_item_record, item_location_record, holdings_record_id))
     ])
   end
 
   # Based on:
   # https://github.com/pulibrary/bibdata/blob/4bcb0562fd9944266df834299ec4340cd3567a57/app/adapters/alma_adapter/alma_item.rb#L81
-  def self.subfields_for_876(folio_item_record, folio_location_record, holdings_record_id)
+  def self.subfields_for_876(folio_item_record, item_location_record, holdings_record_id)
     # TODO: Find an example item record with enumeration and chronology to make sure these values are coming through.
     item_enumeration_and_chronology = [ folio_item_record["enumeration"], folio_item_record["chronology"] ].compact.join(" ")
 
@@ -167,11 +180,11 @@ module Bibdata::Scsb
       MARC::Subfield.new("a", folio_item_record["hrid"]),
       MARC::Subfield.new("p", folio_item_record["barcode"]),
       MARC::Subfield.new("t", folio_item_record["copyNumber"] || "0")
-    ] + recap_876_fields(folio_item_record, folio_location_record)
+    ] + recap_876_fields(folio_item_record, item_location_record)
   end
 
-  def self.collection_group_designation_for_item(folio_item_record, folio_location_record)
-    location_code = folio_location_record&.fetch("code")
+  def self.collection_group_designation_for_item(folio_item_record, item_location_record)
+    location_code = item_location_record&.fetch("code")
     barcode = folio_item_record["barcode"]
     return CGD_PRIVATE if CGD_PRIVATE_LOCATION_CODES.include?(location_code)
     return CGF_PRIVATE if CGD_PRIVATE_BARCODE_PREFIXES.include?(barcode)
@@ -180,15 +193,20 @@ module Bibdata::Scsb
 
   # Based on:
   # https://github.com/pulibrary/bibdata/blob/4bcb0562fd9944266df834299ec4340cd3567a57/app/adapters/alma_adapter/alma_item.rb#L91
-  def self.recap_876_fields(folio_item_record, folio_location_record)
-    collection_group_designation = collection_group_designation_for_item(folio_item_record, folio_location_record)
+  def self.recap_876_fields(folio_item_record, item_location_record)
+    collection_group_designation = collection_group_designation_for_item(folio_item_record, item_location_record)
 
     # Use Restriction value is determined by CGD (Collection Use Designation) value
     use_restriction = case collection_group_designation
-    when CGD_PRIVATE
-      "Supervised use"
-    when CGD_OPEN, CGD_SHARED
-      "" # Blank value
+      when CGD_PRIVATE
+        USE_RESTRICTION_SUPERVISED_USE
+      when CGD_OPEN, CGD_SHARED
+        "" # Blank value
+    end
+
+    # For certain locations, we override the use restriction to enforce USE_RESTRICTION_IN_LIBRARY_USE
+    if USE_RESTRICTION_IN_LIBRARY_USE_LOCATION_CODES.include?(item_location_record&.fetch("code"))
+      use_restriction = USE_RESTRICTION_IN_LIBRARY_USE_LOCATION_CODESZ
     end
 
     [
