@@ -1,0 +1,171 @@
+<?xml version="1.0"?>
+<record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>01852cam a2200445 i 4500</leader>
+  <controlfield tag="001">18338215</controlfield>
+  <controlfield tag="005">20250630135919.2</controlfield>
+  <controlfield tag="008">231130s2022    sy            000 j ara d</controlfield>
+  <datafield ind1=" " ind2=" " tag="020">
+    <subfield code="a">9789933935801</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="020">
+    <subfield code="a">9933935801</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="035">
+    <subfield code="a">(OCoLC)1432430443</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="037">
+    <subfield code="a">348-307</subfield>
+    <subfield code="b">Sulaiman's Bookshop, Beirut, Lebanon, info@sulaimansbookshop.com</subfield>
+    <subfield code="c">$9.00</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="040">
+    <subfield code="a">HUL</subfield>
+    <subfield code="b">eng</subfield>
+    <subfield code="e">rda</subfield>
+    <subfield code="c">HUL</subfield>
+    <subfield code="d">PUL</subfield>
+    <subfield code="d">CUY</subfield>
+    <subfield code="d">OCLCO</subfield>
+    <subfield code="d">CUY</subfield>
+    <subfield code="d">PAU</subfield>
+    <subfield code="d">OCLCO</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="043">
+    <subfield code="a">a-sy---</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="049">
+    <subfield code="a">ZCUA</subfield>
+  </datafield>
+  <datafield ind1=" " ind2="4" tag="050">
+    <subfield code="a">PJ8102</subfield>
+    <subfield code="b">.R37 2022</subfield>
+  </datafield>
+  <datafield ind1="1" ind2=" " tag="100">
+    <subfield code="6">880-01</subfield>
+    <subfield code="a">Rashi&#x304;di&#x304;, &#x2BB;Ala&#x304;&#x2BC;,</subfield>
+    <subfield code="e">author.</subfield>
+    <subfield code="1">https://id.oclc.org/worldcat/entity/E39PCjBYpC7K6Dr8gYkVxBPjkC</subfield>
+  </datafield>
+  <datafield ind1="1" ind2="0" tag="245">
+    <subfield code="6">880-02</subfield>
+    <subfield code="a">Qis&#x323;as&#x323; takhyi&#x304;li&#x304;yah &#x2BB;an al-mu&#x304;si&#x304;qa&#x301; wa-al-fikr :</subfield>
+    <subfield code="b">majmu&#x304;&#x2BB;ah qis&#x323;as&#x323;i&#x304;yah /</subfield>
+    <subfield code="c">&#x2BB;Ala&#x304;&#x2BC; Rashi&#x304;di&#x304;.</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="250">
+    <subfield code="6">880-03</subfield>
+    <subfield code="a">al-T&#x323;ab&#x2BB;ah al-u&#x304;la&#x301;.</subfield>
+  </datafield>
+  <datafield ind1=" " ind2="1" tag="264">
+    <subfield code="6">880-04</subfield>
+    <subfield code="a">Dimashq, al-Jumhu&#x304;ri&#x304;yah al-&#x2BB;Arabi&#x304;yah al-Su&#x304;ri&#x304;yah :</subfield>
+    <subfield code="b">At&#x323;las lil-Nashr wa-al-Tawzi&#x304;&#x2BB;,</subfield>
+    <subfield code="c">2022.</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="300">
+    <subfield code="a">179 pages ;</subfield>
+    <subfield code="c">22 cm</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="336">
+    <subfield code="a">text</subfield>
+    <subfield code="b">txt</subfield>
+    <subfield code="2">rdacontent</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="337">
+    <subfield code="a">unmediated</subfield>
+    <subfield code="b">n</subfield>
+    <subfield code="2">rdamedia</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="338">
+    <subfield code="a">volume</subfield>
+    <subfield code="b">nc</subfield>
+    <subfield code="2">rdacarrier</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="500">
+    <subfield code="a">Short stories.</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="546">
+    <subfield code="a">In Arabic.</subfield>
+  </datafield>
+  <datafield ind1=" " ind2="6" tag="650">
+    <subfield code="a">Nouvelles syriennes.</subfield>
+    <subfield code="0">(CaQQLa)201-0359357</subfield>
+  </datafield>
+  <datafield ind1=" " ind2="4" tag="655">
+    <subfield code="a">Short stories, Arabic</subfield>
+    <subfield code="z">Syria.</subfield>
+  </datafield>
+  <datafield ind1=" " ind2="7" tag="655">
+    <subfield code="a">short stories.</subfield>
+    <subfield code="2">aat</subfield>
+    <subfield code="0">(CStmoGRI)aatgf300202607</subfield>
+  </datafield>
+  <datafield ind1=" " ind2="7" tag="655">
+    <subfield code="a">Short stories.</subfield>
+    <subfield code="2">lcgft</subfield>
+  </datafield>
+  <datafield ind1=" " ind2="7" tag="655">
+    <subfield code="a">Fiction.</subfield>
+    <subfield code="2">lcgft</subfield>
+  </datafield>
+  <datafield ind1=" " ind2="7" tag="655">
+    <subfield code="a">Nouvelles.</subfield>
+    <subfield code="2">rvmgf</subfield>
+    <subfield code="0">(CaQQLa)RVMGF-000000322</subfield>
+  </datafield>
+  <datafield ind1=" " ind2="7" tag="655">
+    <subfield code="a">Romans.</subfield>
+    <subfield code="2">rvmgf</subfield>
+    <subfield code="0">(CaQQLa)RVMGF-000000475</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="752">
+    <subfield code="a">Syria</subfield>
+    <subfield code="d">Damascus.</subfield>
+  </datafield>
+  <datafield ind1="1" ind2=" " tag="880">
+    <subfield code="6">100-01/r</subfield>
+    <subfield code="a">&#x631;&#x634;&#x64A;&#x62F;&#x64A;&#x60C; &#x639;&#x644;&#x627;&#x621;.</subfield>
+  </datafield>
+  <datafield ind1="1" ind2="0" tag="880">
+    <subfield code="6">245-02/r</subfield>
+    <subfield code="a">&#x642;&#x635;&#x635; &#x62A;&#x62E;&#x64A;&#x64A;&#x644;&#x64A;&#x629; &#x639;&#x646; &#x627;&#x644;&#x645;&#x648;&#x633;&#x64A;&#x642;&#x649; &#x648;&#x627;&#x644;&#x641;&#x643;&#x631; :</subfield>
+    <subfield code="b">&#x645;&#x62C;&#x645;&#x648;&#x639;&#x629; &#x642;&#x635;&#x635;&#x64A;&#x629; /</subfield>
+    <subfield code="c">&#x639;&#x644;&#x627;&#x621; &#x631;&#x634;&#x64A;&#x62F;&#x64A;.</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="880">
+    <subfield code="6">250-03/r</subfield>
+    <subfield code="a">&#x627;&#x644;&#x637;&#x628;&#x639;&#x629; &#x627;&#x644;&#x623;&#x648;&#x644;&#x649;.</subfield>
+  </datafield>
+  <datafield ind1=" " ind2="1" tag="880">
+    <subfield code="6">264-04/r</subfield>
+    <subfield code="a">&#x62F;&#x645;&#x634;&#x642;&#x60C; &#x627;&#x644;&#x62C;&#x645;&#x647;&#x648;&#x631;&#x64A;&#x629; &#x627;&#x644;&#x639;&#x631;&#x628;&#x64A;&#x629; &#x627;&#x644;&#x633;&#x648;&#x631;&#x64A;&#x629; :</subfield>
+    <subfield code="b">&#x623;&#x637;&#x644;&#x633; &#x644;&#x644;&#x646;&#x634;&#x631; &#x648;&#x627;&#x644;&#x62A;&#x648;&#x632;&#x64A;&#x639;&#x60C;</subfield>
+    <subfield code="c">2022.</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="948">
+    <subfield code="a">20250630</subfield>
+    <subfield code="b">STATCPY</subfield>
+    <subfield code="c">mw18</subfield>
+    <subfield code="d">MPB</subfield>
+  </datafield>
+  <datafield ind1="f" ind2="f" tag="999">
+    <subfield code="s">c02f5a1b-74f2-453c-adf7-48585caa0300</subfield>
+    <subfield code="i">c69fd996-cad7-5f2b-93a7-a7e56de74d5f</subfield>
+  </datafield>
+  <datafield ind1="0" ind2="0" tag="876">
+    <subfield code="0">20798323</subfield>
+    <subfield code="3"/>
+    <subfield code="a">it00201862215</subfield>
+    <subfield code="p">CU29937574</subfield>
+    <subfield code="t">0</subfield>
+    <subfield code="x">Shared</subfield>
+    <subfield code="h"/>
+    <subfield code="j">In transit</subfield>
+    <subfield code="l">RECAP</subfield>
+  </datafield>
+  <datafield ind1="0" ind2="0" tag="852">
+    <subfield code="0">20798323</subfield>
+    <subfield code="h">PJ8102</subfield>
+    <subfield code="i">.R37 2022g</subfield>
+  </datafield>
+</record>

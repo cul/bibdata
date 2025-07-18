@@ -1,0 +1,188 @@
+<?xml version="1.0"?>
+<record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>02402cam a2200481 i 4500</leader>
+  <controlfield tag="001">15484475</controlfield>
+  <controlfield tag="005">20250621120620.2</controlfield>
+  <controlfield tag="008">210301e202102  it       b    000 0 ita d</controlfield>
+  <datafield ind1=" " ind2=" " tag="020">
+    <subfield code="a">9788830817760 :</subfield>
+    <subfield code="c">22.90 EUR</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="035">
+    <subfield code="a">(OCoLC)1241709508</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="035">
+    <subfield code="a">(ItFiC)it 51232039</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="035">
+    <subfield code="a">15484475</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="040">
+    <subfield code="a">ItFiC</subfield>
+    <subfield code="b">eng</subfield>
+    <subfield code="e">rda</subfield>
+    <subfield code="c">ItFiC</subfield>
+  </datafield>
+  <datafield ind1="0" ind2="0" tag="050">
+    <subfield code="a">BX1378.7</subfield>
+    <subfield code="b">.S634 2021</subfield>
+  </datafield>
+  <datafield ind1="1" ind2=" " tag="100">
+    <subfield code="a">Strona, Marco,</subfield>
+    <subfield code="e">author.</subfield>
+    <subfield code="4">http://id.loc.gov/vocabulary/relators/aut</subfield>
+    <subfield code="0">http://id.loc.gov/authorities/names/no2021030864</subfield>
+  </datafield>
+  <datafield ind1="1" ind2="3" tag="245">
+    <subfield code="a">Il Dio pellegrino :</subfield>
+    <subfield code="b">la migrazione nel discernimento di Papa Francesco : dall'esodo alla comunione /</subfield>
+    <subfield code="c">Marco Strona ; prefazione di Maria Clara Lucchetti Bingemer ; postfazione di Piero Coda.</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="250">
+    <subfield code="a">1a edizione.</subfield>
+  </datafield>
+  <datafield ind1=" " ind2="1" tag="264">
+    <subfield code="a">Assisi :</subfield>
+    <subfield code="b">Cittadella editrice,</subfield>
+    <subfield code="c">febbraio 2021.</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="300">
+    <subfield code="a">489 pages ;</subfield>
+    <subfield code="c">21 cm.</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="336">
+    <subfield code="a">text</subfield>
+    <subfield code="b">txt</subfield>
+    <subfield code="2">rdacontent</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="337">
+    <subfield code="a">unmediated</subfield>
+    <subfield code="b">n</subfield>
+    <subfield code="2">rdamedia</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="338">
+    <subfield code="a">volume</subfield>
+    <subfield code="b">nc</subfield>
+    <subfield code="2">rdacarrier</subfield>
+  </datafield>
+  <datafield ind1="1" ind2=" " tag="490">
+    <subfield code="a">Studi e ricerche. Sezione teologica</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="504">
+    <subfield code="a">Includes bibliographical references (pages 465-483).</subfield>
+  </datafield>
+  <datafield ind1="0" ind2="0" tag="600">
+    <subfield code="a">Francis,</subfield>
+    <subfield code="c">Pope,</subfield>
+    <subfield code="d">1936-</subfield>
+    <subfield code="0">http://id.loc.gov/authorities/names/no99003356</subfield>
+  </datafield>
+  <datafield ind1=" " ind2="0" tag="650">
+    <subfield code="a">Emigration and immigration</subfield>
+    <subfield code="x">Religious aspects</subfield>
+    <subfield code="x">Catholic Church.</subfield>
+    <subfield code="0">http://id.loc.gov/authorities/subjects/sh2009124863</subfield>
+  </datafield>
+  <datafield ind1=" " ind2="0" tag="650">
+    <subfield code="a">Emigration and immigration</subfield>
+    <subfield code="x">Religious aspects</subfield>
+    <subfield code="x">Christianity.</subfield>
+    <subfield code="0">http://id.loc.gov/authorities/subjects/sh2019002703</subfield>
+  </datafield>
+  <datafield ind1=" " ind2="0" tag="830">
+    <subfield code="a">Studi e ricerche (Assisi, Italy).</subfield>
+    <subfield code="p">Teologica.</subfield>
+    <subfield code="0">http://id.loc.gov/authorities/names/no2020142686</subfield>
+  </datafield>
+  <datafield ind1="4" ind2="2" tag="856">
+    <subfield code="u">http://www.columbia.edu/cgi-bin/cul/resolve?clio15484475</subfield>
+    <subfield code="3">TOC</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="900">
+    <subfield code="a">(c) Casalini Libri, CP 12, 50014 Fiesole (Italy). Email: info@casalini.it</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="900">
+    <subfield code="a">MARS</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="901">
+    <subfield code="a">http://ilibri.casalini.it/4798703</subfield>
+    <subfield code="c">it 51232039 </subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="910">
+    <subfield code="a">Supplied on B.O.</subfield>
+    <subfield code="d">NYXAE0F</subfield>
+    <subfield code="e">Burke Library</subfield>
+    <subfield code="g">Casalini Libri</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="920">
+    <subfield code="d">Casalini Libri</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="960">
+    <subfield code="f">21-15317</subfield>
+    <subfield code="i">CU23392169</subfield>
+    <subfield code="t">uts4off</subfield>
+    <subfield code="u">4317APB</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="980">
+    <subfield code="a">20210514</subfield>
+    <subfield code="b">2966</subfield>
+    <subfield code="f">21-15317</subfield>
+    <subfield code="g">1</subfield>
+    <subfield code="i">3233</subfield>
+    <subfield code="n">7892366</subfield>
+    <subfield code="o">51232039</subfield>
+    <subfield code="p">20210429</subfield>
+    <subfield code="r">EUR</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="981">
+    <subfield code="b">22.90</subfield>
+    <subfield code="c">2.06</subfield>
+    <subfield code="e">24.96</subfield>
+    <subfield code="i">29.66</subfield>
+    <subfield code="j">32.33</subfield>
+    <subfield code="k">USD</subfield>
+    <subfield code="u">2.67</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="985">
+    <subfield code="a">BURKE</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="990">
+    <subfield code="b">22.90 EUR</subfield>
+    <subfield code="c">2.06 EUR</subfield>
+    <subfield code="e">24.96 EUR</subfield>
+    <subfield code="i">29.66 USD</subfield>
+    <subfield code="j">32.33 USD</subfield>
+    <subfield code="u">2.67 USD</subfield>
+  </datafield>
+  <datafield ind1="1" ind2=" " tag="948">
+    <subfield code="a">20210517</subfield>
+    <subfield code="b">c</subfield>
+    <subfield code="c">cll1</subfield>
+    <subfield code="d">MPS</subfield>
+  </datafield>
+  <datafield ind1="4" ind2="2" tag="920">
+    <subfield code="3">TOC</subfield>
+    <subfield code="u">http://ilibri.casalini.it/toc/4798703</subfield>
+  </datafield>
+  <datafield ind1="f" ind2="f" tag="999">
+    <subfield code="i">786998c7-c807-5303-8eec-b04e19913b30</subfield>
+    <subfield code="s">998d7a27-7a7f-443b-8b9d-31dc3ede436e</subfield>
+  </datafield>
+  <datafield ind1="0" ind2="0" tag="876">
+    <subfield code="0">18230371</subfield>
+    <subfield code="3"/>
+    <subfield code="a">9911766</subfield>
+    <subfield code="p">CU23392169</subfield>
+    <subfield code="t">0</subfield>
+    <subfield code="x">Shared</subfield>
+    <subfield code="h"/>
+    <subfield code="j">Available</subfield>
+    <subfield code="l">RECAP</subfield>
+  </datafield>
+  <datafield ind1="0" ind2="0" tag="852">
+    <subfield code="0">18230371</subfield>
+    <subfield code="b">off,uts</subfield>
+    <subfield code="h">BX1378.7</subfield>
+    <subfield code="i">.S634 2021</subfield>
+  </datafield>
+</record>
