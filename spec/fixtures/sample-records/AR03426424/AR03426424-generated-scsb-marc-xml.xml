@@ -1,0 +1,183 @@
+<?xml version="1.0"?>
+<record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>02018cas a2200517 i 4500</leader>
+  <controlfield tag="001">16690492</controlfield>
+  <controlfield tag="005">20250621155424.8</controlfield>
+  <controlfield tag="008">220725c20219999bu fx p       0    0bul c</controlfield>
+  <datafield ind1=" " ind2=" " tag="010">
+    <subfield code="a">  2023221009</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="022">
+    <subfield code="a">2815-3138</subfield>
+    <subfield code="y">2815-3316</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="035">
+    <subfield code="a">(OCoLC)1372588331</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="035">
+    <subfield code="a">16690492</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="040">
+    <subfield code="a">ZCU</subfield>
+    <subfield code="b">eng</subfield>
+    <subfield code="e">rda</subfield>
+    <subfield code="c">ZCU</subfield>
+    <subfield code="d">ZCU</subfield>
+  </datafield>
+  <datafield ind1="0" ind2=" " tag="041">
+    <subfield code="a">bul</subfield>
+    <subfield code="a">eng</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="042">
+    <subfield code="a">pcc</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="043">
+    <subfield code="a">e-bu---</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="049">
+    <subfield code="a">ZCUA</subfield>
+  </datafield>
+  <datafield ind1="1" ind2="4" tag="050">
+    <subfield code="a">DR56.7</subfield>
+    <subfield code="b">.B58</subfield>
+  </datafield>
+  <datafield ind1="0" ind2="0" tag="245">
+    <subfield code="6">880-01</subfield>
+    <subfield code="a">Bi&#xFE20;u&#xFE21;letin "Nasledstvo BG"--Nauchni izvestii&#xFE20;a&#xFE21;.</subfield>
+  </datafield>
+  <datafield ind1="1" ind2="1" tag="246">
+    <subfield code="a">Bulletin "Heritage BG"--Research announcements</subfield>
+  </datafield>
+  <datafield ind1="1" ind2=" " tag="246">
+    <subfield code="6">880-02</subfield>
+    <subfield code="a">Nauchni izvestii&#xFE20;a&#xFE21;</subfield>
+  </datafield>
+  <datafield ind1="1" ind2=" " tag="246">
+    <subfield code="a">Research announcements</subfield>
+  </datafield>
+  <datafield ind1=" " ind2="1" tag="264">
+    <subfield code="6">880-03</subfield>
+    <subfield code="a">Sofii&#xFE20;a&#xFE21; :</subfield>
+    <subfield code="b">T&#xFE20;S&#xFE21;entu&#x306;r za vu&#x306;rkhovi postizhenii&#xFE20;a&#xFE21; "Nasledstvo BG",</subfield>
+    <subfield code="c">[2021]-</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="300">
+    <subfield code="a">volumes ;</subfield>
+    <subfield code="c">29-30 cm</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="310">
+    <subfield code="a">Twice a year</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="336">
+    <subfield code="a">text</subfield>
+    <subfield code="b">txt</subfield>
+    <subfield code="2">rdacontent</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="337">
+    <subfield code="a">unmediated</subfield>
+    <subfield code="b">n</subfield>
+    <subfield code="2">rdamedia</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="338">
+    <subfield code="a">volume</subfield>
+    <subfield code="b">nc</subfield>
+    <subfield code="2">rdacarrier</subfield>
+  </datafield>
+  <datafield ind1="1" ind2=" " tag="362">
+    <subfield code="6">880-04</subfield>
+    <subfield code="a">Began with: Broi&#x306; 1 (2021)</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="500">
+    <subfield code="a">Each issue also has a distinctive title</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="546">
+    <subfield code="a">Bulgarian and English</subfield>
+  </datafield>
+  <datafield ind1="0" ind2=" " tag="588">
+    <subfield code="a">Broi&#x306; 1 (2021); title from title page</subfield>
+  </datafield>
+  <datafield ind1="1" ind2=" " tag="588">
+    <subfield code="a">Broi&#x306; 3 (2022)</subfield>
+  </datafield>
+  <datafield ind1=" " ind2="0" tag="650">
+    <subfield code="a">Historic preservation</subfield>
+    <subfield code="z">Bulgaria</subfield>
+    <subfield code="v">Periodicals.</subfield>
+  </datafield>
+  <datafield ind1=" " ind2="0" tag="650">
+    <subfield code="a">Cultural property</subfield>
+    <subfield code="x">Protection</subfield>
+    <subfield code="z">Bulgaria</subfield>
+    <subfield code="v">Periodicals.</subfield>
+  </datafield>
+  <datafield ind1="2" ind2=" " tag="710">
+    <subfield code="6">880-05</subfield>
+    <subfield code="a">T&#xFE20;S&#xFE21;entu&#x306;r za vu&#x306;rkhovi postizhenii&#xFE20;a&#xFE21; "Nasledstvo BG",</subfield>
+    <subfield code="e">issuing body.</subfield>
+    <subfield code="4">http://id.loc.gov/vocabulary/relators/isb</subfield>
+    <subfield code="0">http://id.loc.gov/authorities/names/no2023029387</subfield>
+  </datafield>
+  <datafield ind1="0" ind2="0" tag="880">
+    <subfield code="6">245-01</subfield>
+    <subfield code="a">&#x411;&#x44E;&#x43B;&#x435;&#x442;&#x438;&#x43D; "&#x41D;&#x430;&#x441;&#x43B;&#x435;&#x434;&#x441;&#x442;&#x432;&#x43E; &#x411;&#x413;"--&#x41D;&#x430;&#x443;&#x447;&#x43D;&#x438; &#x438;&#x437;&#x432;&#x435;&#x441;&#x442;&#x438;&#x44F;</subfield>
+  </datafield>
+  <datafield ind1="1" ind2=" " tag="880">
+    <subfield code="6">246-02</subfield>
+    <subfield code="a">&#x41D;&#x430;&#x443;&#x447;&#x43D;&#x438; &#x438;&#x437;&#x432;&#x435;&#x441;&#x442;&#x438;&#x44F;</subfield>
+  </datafield>
+  <datafield ind1=" " ind2="1" tag="880">
+    <subfield code="6">264-03</subfield>
+    <subfield code="a">&#x421;&#x43E;&#x444;&#x438;&#x44F; :</subfield>
+    <subfield code="b">&#x426;&#x435;&#x43D;&#x442;&#x44A;&#x440; &#x437;&#x430; &#x432;&#x44A;&#x440;&#x445;&#x43E;&#x432;&#x438; &#x43F;&#x43E;&#x441;&#x442;&#x438;&#x436;&#x435;&#x43D;&#x438;&#x44F; "&#x41D;&#x430;&#x441;&#x43B;&#x435;&#x434;&#x441;&#x442;&#x432;&#x43E; &#x411;&#x413;",</subfield>
+    <subfield code="c">[2021]-</subfield>
+  </datafield>
+  <datafield ind1="1" ind2=" " tag="880">
+    <subfield code="6">362-04</subfield>
+    <subfield code="a">Began with: &#x411;&#x440;&#x43E;&#x439; 1 (2021)</subfield>
+  </datafield>
+  <datafield ind1="2" ind2=" " tag="880">
+    <subfield code="6">710-05</subfield>
+    <subfield code="a">&#x426;&#x435;&#x43D;&#x442;&#x44A;&#x440; &#x437;&#x430; &#x432;&#x44A;&#x440;&#x445;&#x43E;&#x432;&#x438; &#x43F;&#x43E;&#x441;&#x442;&#x438;&#x436;&#x435;&#x43D;&#x438;&#x44F; "&#x41D;&#x430;&#x441;&#x43B;&#x435;&#x434;&#x441;&#x442;&#x432;&#x43E; &#x411;&#x413;",</subfield>
+    <subfield code="e">issuing body.</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="900">
+    <subfield code="a">MARS</subfield>
+  </datafield>
+  <datafield ind1="1" ind2=" " tag="948">
+    <subfield code="a">20230314</subfield>
+    <subfield code="b">s</subfield>
+    <subfield code="c">rr2205</subfield>
+    <subfield code="d">OSMC</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="960">
+    <subfield code="f">3311\</subfield>
+    <subfield code="s">18.00</subfield>
+    <subfield code="t">glx4off</subfield>
+    <subfield code="u">2142BAP</subfield>
+  </datafield>
+  <datafield ind1=" " ind2=" " tag="994">
+    <subfield code="a">C0</subfield>
+    <subfield code="b">ZCU</subfield>
+  </datafield>
+  <datafield ind1="f" ind2="f" tag="999">
+    <subfield code="i">f41d6689-4ab2-51ff-9a08-4d79eb7ace8f</subfield>
+    <subfield code="s">a668cec9-fe9a-49eb-90d6-99f98104dabb</subfield>
+  </datafield>
+  <datafield ind1="0" ind2="0" tag="876">
+    <subfield code="0">19332220</subfield>
+    <subfield code="3">broi 6 (2024)</subfield>
+    <subfield code="a">10513770</subfield>
+    <subfield code="p">AR03426424</subfield>
+    <subfield code="t">0</subfield>
+    <subfield code="x">Shared</subfield>
+    <subfield code="h">In Library Use</subfield>
+    <subfield code="j">Checked out</subfield>
+    <subfield code="l">RECAP</subfield>
+  </datafield>
+  <datafield ind1="0" ind2="0" tag="852">
+    <subfield code="0">19332220</subfield>
+    <subfield code="b">off,ave</subfield>
+    <subfield code="h">DR56.7</subfield>
+    <subfield code="i">.B58</subfield>
+  </datafield>
+</record>

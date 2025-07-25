@@ -235,7 +235,7 @@ module Bibdata::Scsb
 
     # For certain locations, we override the use restriction to enforce USE_RESTRICTION_IN_LIBRARY_USE
     if USE_RESTRICTION_IN_LIBRARY_USE_LOCATION_CODES.include?(item_location_record&.fetch('code'))
-      use_restriction = USE_RESTRICTION_IN_LIBRARY_USE_LOCATION_CODESZ
+      use_restriction = USE_RESTRICTION_IN_LIBRARY_USE
     end
 
     [
