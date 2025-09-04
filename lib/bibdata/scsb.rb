@@ -215,7 +215,7 @@ module Bibdata::Scsb
     location_code = item_location_record&.fetch('code')
     barcode = folio_item_record['barcode']
     return CGD_PRIVATE if CGD_PRIVATE_LOCATION_CODES.include?(location_code)
-    return CGF_PRIVATE if CGD_PRIVATE_BARCODE_PREFIXES.include?(barcode)
+    return CGD_PRIVATE if CGD_PRIVATE_BARCODE_PREFIXES.include?(barcode)
 
     CGD_SHARED
   end
