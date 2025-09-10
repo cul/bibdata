@@ -31,6 +31,52 @@ RSpec.describe Bibdata::Scsb do
     end
 
 
+    context "when the original record's bibliographic marc data has an 876 $x value of 'Committed'" do
+      let(:barcode) { 'CU23392169' }
+      let(:source_record) {
+        record = JSON.parse(File.read(File.join(fixture_base_dir, "#{barcode}-source-record.json")))
+        # Remove any existing 876 fields
+        record['parsedRecord']['content']['fields'].delete_if { |f| f.keys.include?('876') }
+        # Add a new 876 with an $x value of 'Committed'
+        record['parsedRecord']['content']['fields'].push(
+          {
+            '876' => {
+              'ind1' => ' ',
+              'ind2'=> ' ',
+              'subfields'=> [
+                { 'x' => 'Committed' }
+              ]
+            }
+          }
+        )
+
+        record
+      }
+      let(:expected_xml) do
+        marc_xml_string = File.read(File.join(fixture_base_dir, "#{barcode}-generated-scsb-marc-xml.xml"))
+        xml_doc = Nokogiri::XML(marc_xml_string, &:noblanks)
+        # We are expecting the output 876 to have amn 876 $x value of 'Committed'
+        xml_doc.xpath(
+          '/marc:record/marc:datafield[@tag="876"]/marc:subfield[@code="x"]',
+          'marc' => 'http://www.loc.gov/MARC21/slim'
+        ).first.content = Bibdata::Scsb::Constants::CGD_COMMITTED
+        xml_doc.to_xml(indent: 2)
+      end
+
+      before do
+        allow(Bibdata::FolioApiClient.instance).to receive(:find_item_record).and_return(item_record)
+        allow(Bibdata::FolioApiClient.instance).to receive(:find_location_record).and_return(location_record)
+        allow(Bibdata::FolioApiClient.instance).to receive(:find_holdings_record).and_return(holdings_record)
+        allow(Bibdata::FolioApiClient.instance).to receive(:find_source_record).and_return(source_record)
+      end
+
+      it "generates the expected xml, which has an 876 $x value of 'Committed'" do
+        marc_record = described_class.merged_marc_record_for_barcode(barcode)
+        generated_xml = Nokogiri::XML(marc_record.to_xml.to_s, &:noblanks).to_xml(indent: 2)
+        expect(generated_xml).to eq(expected_xml)
+      end
+    end
+
     context "when location cannot be resolved" do
       let(:barcode) { 'CU23392169' }
       let(:location_record) { nil }

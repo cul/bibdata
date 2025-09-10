@@ -45,6 +45,11 @@ module Bibdata::Scsb
     marc_record
   end
 
+  # Returns the value if present, otherwise returns nil.
+  def self.get_original_876_x_value(marc_record)
+    marc_record.send(:[], '876')&.send(:[], 'x')
+  end
+
   # Based on:
   # https://github.com/pulibrary/bibdata/blob/4bcb0562fd9944266df834299ec4340cd3567a57/app/adapters/alma_adapter/alma_item.rb#L74
   def self.replace_852_field!(marc_record, folio_holdings_record, item_location_record) # rubocop:disable Metrics/AbcSize
@@ -75,13 +80,16 @@ module Bibdata::Scsb
   # https://github.com/pulibrary/bibdata/blob/4bcb0562fd9944266df834299ec4340cd3567a57/app/adapters/alma_adapter/marc_record.rb#L31
   # https://github.com/pulibrary/bibdata/blob/4bcb0562fd9944266df834299ec4340cd3567a57/app/adapters/alma_adapter/alma_item.rb#L74
   def self.replace_876_field!(marc_record, folio_item_record, item_location_record, holdings_record_id)
+    # Capture original 876 $x value before we delete the original 876 field
+    original_marc_record_876_x_value = get_original_876_x_value(marc_record)
+
     # Delete 876 field if present because we are going to generate our own
     marc_record.fields.delete_if { |f| f.tag == '876' }
     marc_record.fields.concat(
       [
         MARC::DataField.new(
           '876', '0', '0',
-          *subfields_for_876(folio_item_record, item_location_record, holdings_record_id)
+          *subfields_for_876(folio_item_record, item_location_record, holdings_record_id, original_marc_record_876_x_value)
         )
       ]
     )
@@ -89,7 +97,8 @@ module Bibdata::Scsb
 
   # Based on:
   # https://github.com/pulibrary/bibdata/blob/4bcb0562fd9944266df834299ec4340cd3567a57/app/adapters/alma_adapter/alma_item.rb#L81
-  def self.subfields_for_876(folio_item_record, item_location_record, holdings_record_id)
+  def self.subfields_for_876(folio_item_record, item_location_record, holdings_record_id,
+                             original_marc_record_876_x_value)
     # TODO: Find an example item record with enumeration and chronology to make sure these values are coming through.
     item_enumeration_and_chronology = [folio_item_record['enumeration'],
                                        folio_item_record['chronology']].compact.join(' ')
@@ -100,10 +109,11 @@ module Bibdata::Scsb
       MARC::Subfield.new('a', folio_item_record['hrid']),
       MARC::Subfield.new('p', folio_item_record['barcode']),
       MARC::Subfield.new('t', folio_item_record['copyNumber'] || '0')
-    ] + recap_876_fields(folio_item_record, item_location_record)
+    ] + recap_876_fields(folio_item_record, item_location_record, original_marc_record_876_x_value)
   end
 
-  def self.collection_group_designation_for_item(folio_item_record, item_location_record)
+  def self.collection_group_designation_for_item(folio_item_record, item_location_record,
+                                                 original_marc_record_876_x_value)
     location_code = item_location_record&.fetch('code')
     barcode = folio_item_record['barcode']
     if Bibdata::Scsb::Constants::CGD_PRIVATE_LOCATION_CODES.include?(location_code)
@@ -113,13 +123,20 @@ module Bibdata::Scsb
       return Bibdata::Scsb::Constants::CGD_PRIVATE
     end
 
+    # If none of the above conditions resulted in an early exit from this method,
+    # and the original marc record's 876 $x was 'Committed', then return a CGD value of 'Committed'.
+    if original_marc_record_876_x_value == Bibdata::Scsb::Constants::CGD_COMMITTED
+      return Bibdata::Scsb::Constants::CGD_COMMITTED
+    end
+
     Bibdata::Scsb::Constants::CGD_SHARED
   end
 
   # Based on:
   # https://github.com/pulibrary/bibdata/blob/4bcb0562fd9944266df834299ec4340cd3567a57/app/adapters/alma_adapter/alma_item.rb#L91
-  def self.recap_876_fields(folio_item_record, item_location_record)
-    collection_group_designation = collection_group_designation_for_item(folio_item_record, item_location_record)
+  def self.recap_876_fields(folio_item_record, item_location_record, original_marc_record_876_x_value)
+    collection_group_designation = collection_group_designation_for_item(folio_item_record, item_location_record,
+                                                                         original_marc_record_876_x_value)
 
     # Use Restriction value is determined by CGD (Collection Use Designation) value
     use_restriction = case collection_group_designation

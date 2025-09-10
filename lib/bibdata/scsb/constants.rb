@@ -3,6 +3,7 @@
 module Bibdata::Scsb::Constants
   CGD_PRIVATE = 'Private'
   CGD_SHARED = 'Shared'
+  CGD_COMMITTED = 'Committed'
   CGD_OPEN = 'Open' # NOTE: we don't actually ever send this value
 
   CGD_PRIVATE_LOCATION_CODES = [
