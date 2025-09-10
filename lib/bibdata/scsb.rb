@@ -1,77 +1,6 @@
 # frozen_string_literal: true
 
 module Bibdata::Scsb
-  CGD_PRIVATE = 'Private'
-  CGD_SHARED = 'Shared'
-  CGD_OPEN = 'Open' # NOTE: we don't actually ever send this value
-
-  CGD_PRIVATE_LOCATION_CODES = [
-    'avda',
-    'off,avda',
-    'avr4off',
-    'bmcr4off',
-    'off,bmcr',
-    'off,avr',
-    'off,bssc',
-    'dic',
-    'dic4off',
-    'off,dic',
-    'eaa4off',
-    'off,eaa',
-    'ean',
-    'off,ean',
-    'ear',
-    'off,ear',
-    'far',
-    'far4off',
-    'off,far',
-    'off,hssc',
-    'hsx',
-    'off,hsx',
-    'les',
-    'off,les',
-    'oral',
-    'off,oral',
-    'prd',
-    'off,prd',
-    'rbms',
-    'off,rbms',
-    'rbx',
-    'rbx4off',
-    'off,rbx',
-    'uacl',
-    'off,uacl',
-    'unr',
-    'off,unr',
-    'uta',
-    'off,uta',
-    'utmrl',
-    'off,utrml',
-    'vmc',
-    'off,vmc'
-  ].freeze
-
-  CGD_PRIVATE_BARCODE_PREFIXES = [
-    'RS',
-    'AD',
-    'HX',
-    'UA',
-    'UT'
-  ].freeze
-
-  USE_RESTRICTION_IN_LIBRARY_USE = 'In Library Use'
-  USE_RESTRICTION_SUPERVISED_USE = 'Supervised Use'
-  USE_RESTRICTION_BLANK = ''
-
-  # Any code in this list should result in an "In Library Use" Use Restriction value.
-  USE_RESTRICTION_IN_LIBRARY_USE_LOCATION_CODES = [
-    'off,ave',
-    'off,fax',
-    'off,mrr',
-    'off,msr',
-    'off,mvr'
-  ].freeze
-
   def self.fetch_folio_records_associated_with_item(item_record)
     location_record = begin
       Bibdata::FolioApiClient.instance.find_location_record(location_id: item_record['permanentLocationId'])
@@ -214,10 +143,14 @@ module Bibdata::Scsb
   def self.collection_group_designation_for_item(folio_item_record, item_location_record)
     location_code = item_location_record&.fetch('code')
     barcode = folio_item_record['barcode']
-    return CGD_PRIVATE if CGD_PRIVATE_LOCATION_CODES.include?(location_code)
-    return CGD_PRIVATE if CGD_PRIVATE_BARCODE_PREFIXES.include?(barcode)
+    if Bibdata::Scsb::Constants::CGD_PRIVATE_LOCATION_CODES.include?(location_code)
+      return Bibdata::Scsb::Constants::CGD_PRIVATE
+    end
+    if Bibdata::Scsb::Constants::CGD_PRIVATE_BARCODE_PREFIXES.include?(barcode)
+      return Bibdata::Scsb::Constants::CGD_PRIVATE
+    end
 
-    CGD_SHARED
+    Bibdata::Scsb::Constants::CGD_SHARED
   end
 
   # Based on:
@@ -227,15 +160,17 @@ module Bibdata::Scsb
 
     # Use Restriction value is determined by CGD (Collection Use Designation) value
     use_restriction = case collection_group_designation
-                      when CGD_PRIVATE
-                        USE_RESTRICTION_SUPERVISED_USE
-                      when CGD_OPEN, CGD_SHARED
+                      when Bibdata::Scsb::Constants::CGD_PRIVATE
+                        Bibdata::Scsb::Constants::USE_RESTRICTION_SUPERVISED_USE
+                      when Bibdata::Scsb::Constants::CGD_OPEN, Bibdata::Scsb::Constants::CGD_SHARED
                         '' # Blank value
                       end
 
     # For certain locations, we override the use restriction to enforce USE_RESTRICTION_IN_LIBRARY_USE
-    if USE_RESTRICTION_IN_LIBRARY_USE_LOCATION_CODES.include?(item_location_record&.fetch('code'))
-      use_restriction = USE_RESTRICTION_IN_LIBRARY_USE
+    if Bibdata::Scsb::Constants::USE_RESTRICTION_IN_LIBRARY_USE_LOCATION_CODES.include?(
+      item_location_record&.fetch('code')
+    )
+      use_restriction = Bibdata::Scsb::Constants::USE_RESTRICTION_IN_LIBRARY_USE
     end
 
     [
