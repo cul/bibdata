@@ -89,7 +89,9 @@ module Bibdata::Scsb
       [
         MARC::DataField.new(
           '876', '0', '0',
-          *subfields_for_876(folio_item_record, item_location_record, holdings_record_id, original_marc_record_876_x_value)
+          *subfields_for_876(
+            folio_item_record, item_location_record, holdings_record_id, original_marc_record_876_x_value
+          )
         )
       ]
     )
