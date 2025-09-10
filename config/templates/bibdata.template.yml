@@ -1,0 +1,5 @@
+development:
+  barcode_update_api_token: changethis
+
+test:
+  barcode_update_api_token: changethis

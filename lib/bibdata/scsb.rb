@@ -107,7 +107,7 @@ module Bibdata::Scsb
     enrich_with_holding!(marc_record, holdings_record, location_record)
     strip_non_numeric!(marc_record)
 
-    # The section below is for generating spec fixture files to troubleshoot specific cases.
+    # The commented-out section below is for generating spec fixture files to troubleshoot specific cases.
     # if Rails.env.development?
     #   Bibdata::FixtureHelper.write_records_to_fixture_dir(
     #     barcode, item_record, location_record, holdings_record, source_record, marc_record.to_xml.to_s
