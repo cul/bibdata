@@ -28,6 +28,8 @@ jobs:
       RAILS_ENV: test
 
     steps:
+      - name: Install libxslt for nokogiri gem (required for ruby platform build)
+        run: sudo apt-get install -y libxml2-dev libxslt-dev
       - uses: actions/checkout@v4
       - name: Add --no-document option to .gemrc file to speed up bundle install
         run: "echo 'gem: --no-document' > ~/.gemrc"
