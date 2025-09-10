@@ -30,7 +30,7 @@ gem "thruster", require: false
 # ruby-marc library [https://github.com/ruby-marc/ruby-marc]
 gem "marc", "~> 1.3"
 
-gem "nokogiri", "~> 1.17.2"
+gem 'nokogiri', '~> 1.18', '>= 1.18.9', force_ruby_platform: true
 
 # Rainbow for text coloring
 gem "rainbow", "~> 3.0"
