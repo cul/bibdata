@@ -30,11 +30,10 @@ module Bibdata::Scsb
     fetch_folio_records_associated_with_item(item_record) => { location_record:, holdings_record:, source_record: }
     marc_record = MARC::Record.new_from_hash(source_record['parsedRecord']['content'])
 
-    # The enrichment steps below are based on:
-    # https://github.com/pulibrary/bibdata/blob/3e8888ce06944bb0fd0e3da7c13f603edf3d45a5/app/controllers/barcode_controller.rb#L25
-    enrich_with_item!(marc_record, item_record, location_record, holdings_record['hrid'])
-    enrich_with_holding!(marc_record, holdings_record, location_record)
-    strip_non_numeric!(marc_record)
+    delete_866_field!(marc_record)
+    replace_876_field!(marc_record, item_record, location_record, holdings_record['hrid'])
+    replace_852_field!(marc_record, holdings_record, location_record)
+    remove_fields_with_non_numeric_tags!(marc_record)
 
     # The commented-out section below is for generating spec fixture files to troubleshoot specific cases.
     # if Rails.env.development?
@@ -46,18 +45,12 @@ module Bibdata::Scsb
     marc_record
   end
 
-  def self.enrich_with_holding!(marc_record, folio_holdings_record, item_location_record)
-    delete_conflicting_holdings_data!(marc_record)
-    marc_record.fields.concat(
-      [
-        generate_852(folio_holdings_record, item_location_record)
-      ].flatten.compact
-    )
-  end
-
   # Based on:
   # https://github.com/pulibrary/bibdata/blob/4bcb0562fd9944266df834299ec4340cd3567a57/app/adapters/alma_adapter/alma_item.rb#L74
-  def self.generate_852(folio_holdings_record, item_location_record)
+  def self.replace_852_field!(marc_record, folio_holdings_record, item_location_record) # rubocop:disable Metrics/AbcSize
+    # Delete 852 field if present because we are going to generate our own
+    marc_record.fields.delete_if { |f| f.tag == '852' }
+
     location_classification_part, location_item_part = folio_holdings_record['callNumber'].split(' ', 2)
     item_location_record_code = item_location_record&.fetch('code')
 
@@ -68,16 +61,20 @@ module Bibdata::Scsb
       MARC::Subfield.new('i', location_item_part)
     ].compact
 
-    MARC::DataField.new(
-      '852', '0', '0',
-      *subfields
+    marc_record.fields.concat(
+      [
+        MARC::DataField.new(
+          '852', '0', '0',
+          *subfields
+        )
+      ].flatten.compact
     )
   end
 
   # Based on:
   # https://github.com/pulibrary/bibdata/blob/4bcb0562fd9944266df834299ec4340cd3567a57/app/adapters/alma_adapter/marc_record.rb#L31
   # https://github.com/pulibrary/bibdata/blob/4bcb0562fd9944266df834299ec4340cd3567a57/app/adapters/alma_adapter/alma_item.rb#L74
-  def self.enrich_with_item!(marc_record, folio_item_record, item_location_record, holdings_record_id)
+  def self.replace_876_field!(marc_record, folio_item_record, item_location_record, holdings_record_id)
     # Delete 876 field if present because we are going to generate our own
     marc_record.fields.delete_if { |f| f.tag == '876' }
     marc_record.fields.concat(
@@ -174,15 +171,15 @@ module Bibdata::Scsb
     ]
   end
 
-  # This removes the bib record's 852s and 86Xs, to reduce confusion when holdings data is added.
+  # This removes the bib record's 866 fields, to reduce confusion when we add other holdings data in a separate step.
   # Based on: https://github.com/pulibrary/bibdata/blob/4bcb0562fd9944266df834299ec4340cd3567a57/app/adapters/alma_adapter/marc_record.rb#L38
-  def self.delete_conflicting_holdings_data!(marc_record)
-    marc_record.fields.delete_if { |f| %w[852 866].include? f.tag }
+  def self.delete_866_field!(marc_record)
+    marc_record.fields.delete_if { |f| %w[866].include? f.tag }
   end
 
   # Based on:
   # https://github.com/pulibrary/bibdata/blob/4bcb0562fd9944266df834299ec4340cd3567a57/app/adapters/alma_adapter/marc_record.rb#L59
-  def self.strip_non_numeric!(marc_record)
+  def self.remove_fields_with_non_numeric_tags!(marc_record)
     marc_record.fields.delete_if do |field|
       # tag with non numeric character
       field.tag.scan(/^(\s|\D+)/).present?
