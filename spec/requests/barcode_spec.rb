@@ -28,23 +28,6 @@ RSpec.describe "Barcodes", type: :request do
     ).and_return(xml_response)
   end
 
-  # TODO: Delete the describe block below once we stop supporting this endpoint (in the near future)
-  describe "GET /barcode/:barcode" do
-
-    it "returns a 200 OK response for a valid barcode" do
-
-      get "/barcode/#{valid_barcode}"
-      expect(response).to have_http_status(:ok)
-      expect(response.content_type).to eq("application/xml; charset=utf-8")
-      expect(response.body).to eq(xml_response)
-    end
-
-    it "returns a 404 Not Found response for an invalid barcode" do
-      get "/barcode/#{invalid_barcode}"
-      expect(response).to have_http_status(:not_found)
-    end
-  end
-
   describe "GET /barcode/:barcode/query" do
     it "returns a 200 OK response for a valid barcode" do
       get "/barcode/#{valid_barcode}/query"
