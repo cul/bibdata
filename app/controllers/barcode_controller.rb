@@ -6,19 +6,19 @@ class BarcodeController < ApplicationController
   def query
     barcode = params[:barcode] # Example: 'CU23392169'
 
-    xml = Bibdata::Scsb.merged_marc_collection_xml_for_barcode(barcode)
-    return render_not_found barcode if xml.nil?
+    marc_record = Bibdata::Scsb.merged_marc_record_for_barcode(barcode)
+    return render_not_found barcode if marc_record.nil?
 
-    render xml: xml
+    render xml: Bibdata::MarcHelpers.render_marc_records_as_marc_collection_xml([marc_record])
   end
 
   def update
     barcode = params[:barcode] # Example: 'CU23392169'
 
-    xml = Bibdata::Scsb.merged_marc_collection_xml_for_barcode(barcode)
-    return render_not_found barcode if xml.nil?
+    marc_record = Bibdata::Scsb.merged_marc_record_for_barcode(barcode)
+    return render_not_found barcode if marc_record.nil?
 
-    render xml: xml
+    render xml: Bibdata::MarcHelpers.render_marc_records_as_marc_collection_xml([marc_record])
   end
 
   private
