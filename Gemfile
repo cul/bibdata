@@ -49,7 +49,7 @@ group :development, :test do
   # rubocop + CUL presets
   gem 'rubocul', '~> 4.0.3'
 
-  gem "rspec-rails", "~>7.0.0"
+  gem "rspec-rails", "~> 8.0"
 
   gem "simplecov", require: false
 end
