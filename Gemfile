@@ -47,7 +47,7 @@ group :development, :test do
   gem "brakeman", require: false
 
   # rubocop + CUL presets
-  gem 'rubocul', '~> 4.0.3'
+  gem 'rubocul', '~> 4.0.12'
 
   gem "rspec-rails", "~> 8.0"
 
