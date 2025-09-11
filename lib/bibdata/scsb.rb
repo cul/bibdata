@@ -23,12 +23,31 @@ module Bibdata::Scsb
     }
   end
 
-  def self.merged_marc_record_for_barcode(barcode)
+  def self.merged_marc_record_for_barcode(barcode, flip_location: false)
     item_record = Bibdata::FolioApiClient.instance.find_item_record(barcode: barcode)
     return nil if item_record.nil?
 
     fetch_folio_records_associated_with_item(item_record) => { location_record:, holdings_record:, source_record: }
     marc_record = MARC::Record.new_from_hash(source_record['parsedRecord']['content'])
+
+    if location_record && flip_location
+      current_location_code = location_record.fetch('code')
+      flipped_location_code = Bibdata::OffisteLocationFlipper.location_code_to_recap_flipped_location_code(
+        current_location_code, barcode
+      )
+
+      raise "item_record: #{item_record}"
+      raise "current_location_code: #{current_location_code}, flipped_location_code: #{flipped_location_code}"
+
+      # If the current location code does not equal the desired flipped location code,
+      # update the item record to point to the new location with the flipped location code.
+      if current_location_code != flipped_location_code
+        # TODO: Update item record so that it points to the flipped location
+
+        # And then invoke this method again with `flip_location: false` and return the result.
+        return merged_marc_record_for_barcode(barcode, flip_location: false)
+      end
+    end
 
     delete_866_field!(marc_record)
     replace_876_field!(marc_record, item_record, location_record, holdings_record['hrid'])

@@ -6,7 +6,7 @@ class BarcodeController < ApplicationController
   def query
     barcode = params[:barcode] # Example: 'CU23392169'
 
-    marc_record = Bibdata::Scsb.merged_marc_record_for_barcode(barcode)
+    marc_record = Bibdata::Scsb.merged_marc_record_for_barcode(barcode, flip_location: true) # temporarily flipping location code here
     return render_not_found barcode if marc_record.nil?
 
     render xml: Bibdata::MarcHelpers.render_marc_records_as_marc_collection_xml([marc_record])
@@ -15,7 +15,7 @@ class BarcodeController < ApplicationController
   def update
     barcode = params[:barcode] # Example: 'CU23392169'
 
-    marc_record = Bibdata::Scsb.merged_marc_record_for_barcode(barcode)
+    marc_record = Bibdata::Scsb.merged_marc_record_for_barcode(barcode, flip_location: true)
     return render_not_found barcode if marc_record.nil?
 
     render xml: Bibdata::MarcHelpers.render_marc_records_as_marc_collection_xml([marc_record])
