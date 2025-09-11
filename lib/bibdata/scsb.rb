@@ -3,7 +3,7 @@
 module Bibdata::Scsb
   def self.fetch_folio_records_associated_with_item(item_record)
     location_record = begin
-      Bibdata::FolioApiClient.instance.find_location_record(location_id: item_record['permanentLocationId'])
+      Bibdata::FolioApiClient.instance.find_location_record(location_id: item_record['effectiveLocationId'])
     rescue Faraday::ResourceNotFound
       nil
     end
