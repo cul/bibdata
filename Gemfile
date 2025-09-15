@@ -36,7 +36,7 @@ gem 'nokogiri', '~> 1.18', '>= 1.18.9', force_ruby_platform: true
 gem "rainbow", "~> 3.0"
 
 # FOLIO Client
-gem "folio_api_client", "~> 0.4.0"
+gem "folio_api_client", "~> 0.4.2"
 # gem "folio_api_client", path: "../folio_api_client"
 
 group :development, :test do
