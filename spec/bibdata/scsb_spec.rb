@@ -6,6 +6,7 @@ RSpec.describe Bibdata::Scsb do
     let(:item_record) { JSON.parse(File.read(File.join(fixture_base_dir, "#{barcode}-item-record.json"))) }
     let(:location_record) { JSON.parse(File.read(File.join(fixture_base_dir, "#{barcode}-location-record.json"))) }
     let(:holdings_record) { JSON.parse(File.read(File.join(fixture_base_dir, "#{barcode}-holdings-record.json"))) }
+    let(:material_type_record) { JSON.parse(File.read(File.join(fixture_base_dir, "#{barcode}-material-type-record.json"))) }
     let(:source_record) { JSON.parse(File.read(File.join(fixture_base_dir, "#{barcode}-source-record.json"))) }
 
     let(:expected_xml) do
@@ -21,6 +22,7 @@ RSpec.describe Bibdata::Scsb do
           allow(Bibdata::FolioApiClient.instance).to receive(:find_location_record).and_return(location_record)
           allow(Bibdata::FolioApiClient.instance).to receive(:find_holdings_record).and_return(holdings_record)
           allow(Bibdata::FolioApiClient.instance).to receive(:find_source_record).and_return(source_record)
+          allow(Bibdata::FolioApiClient.instance).to receive(:find_material_type_record).and_return(material_type_record)
         end
         it "generates the expected xml" do
           marc_record = described_class.merged_marc_record_for_barcode(barcode)
@@ -67,6 +69,7 @@ RSpec.describe Bibdata::Scsb do
         allow(Bibdata::FolioApiClient.instance).to receive(:find_item_record).and_return(item_record)
         allow(Bibdata::FolioApiClient.instance).to receive(:find_location_record).and_return(location_record)
         allow(Bibdata::FolioApiClient.instance).to receive(:find_holdings_record).and_return(holdings_record)
+        allow(Bibdata::FolioApiClient.instance).to receive(:find_material_type_record).and_return(material_type_record)
         allow(Bibdata::FolioApiClient.instance).to receive(:find_source_record).and_return(source_record)
       end
 
@@ -95,6 +98,7 @@ RSpec.describe Bibdata::Scsb do
         allow(Bibdata::FolioApiClient.instance).to receive(:find_item_record).and_return(item_record)
         allow(Bibdata::FolioApiClient.instance).to receive(:find_location_record).and_return(location_record)
         allow(Bibdata::FolioApiClient.instance).to receive(:find_holdings_record).and_return(holdings_record)
+        allow(Bibdata::FolioApiClient.instance).to receive(:find_material_type_record).and_return(material_type_record)
         allow(Bibdata::FolioApiClient.instance).to receive(:find_source_record).and_return(source_record)
       end
 

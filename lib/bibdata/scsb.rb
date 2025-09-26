@@ -2,11 +2,9 @@
 
 module Bibdata::Scsb
   def self.fetch_folio_records_associated_with_item(item_record)
-    location_record = begin
-      Bibdata::FolioApiClient.instance.find_location_record(location_id: item_record['effectiveLocationId'])
-    rescue Faraday::ResourceNotFound
-      nil
-    end
+    location_record = Bibdata::FolioApiClient.instance.find_location_record(
+      location_id: item_record['effectiveLocationId']
+    )
 
     holdings_record = Bibdata::FolioApiClient.instance.find_holdings_record(
       holdings_record_id: item_record['holdingsRecordId']
@@ -16,36 +14,91 @@ module Bibdata::Scsb
       instance_record_id: holdings_record['instanceId']
     )
 
+    material_type_record = Bibdata::FolioApiClient.instance.find_material_type_record(
+      material_type_id: item_record['materialTypeId']
+    )
+
     {
       location_record: location_record,
       holdings_record: holdings_record,
-      source_record: source_record
+      source_record: source_record,
+      material_type_record: material_type_record
     }
   end
 
-  def self.merged_marc_record_for_barcode(barcode, flip_location: false)
+  def self.perform_location_flip!(current_location_record, flipped_location_code, item_record, holdings_record) # rubocop:disable Metrics/AbcSize
+    barcode = item_record['barcode']
+
+    Rails.logger.info(
+      "------------------------------\n"\
+      "Barcode #{barcode}: Need to flip effective location "\
+      "#{current_location_record['code']} to #{flipped_location_code}"
+    )
+    if current_location_record['id'] == item_record['temporaryLocationId']
+      # This is a data error and we should report it
+      Rails.logger.info(
+        "Barcode #{barcode} problem: Item effectiveLocationId matches item temporaryLocationId. "\
+        'Did not expect to find a value in item temporaryLocationId.'
+      )
+    elsif current_location_record['id'] == item_record['permanentLocationId']
+      Rails.logger.info(
+        "Barcode #{barcode} update: Updating item permanentLocationId to #{flipped_location_code}."
+      )
+      Bibdata::FolioApiClient.instance.update_item_record_permanent_location(
+        item_barcode: barcode,
+        location_type: :permanent,
+        new_location_code: flipped_location_code
+      )
+    elsif current_location_record['id'] == holdings_record['temporaryLocationId']
+      Rails.logger.info(
+        "Barcode #{barcode} problem: Item effectiveLocationId matches parent holdings temporaryLocationId. "\
+        'Did not expect to find a value in parent holdings temporaryLocationId.'
+      )
+    elsif current_location_record['id'] == holdings_record['permanentLocationId']
+      Rails.logger.info(
+        "Barcode #{barcode} update: Updating parent holdings permanentLocationId to #{flipped_location_code}."
+      )
+      Bibdata::FolioApiClient.instance.update_item_parent_holdings_record_permanent_location(
+        item_barcode: barcode,
+        location_type: :permanent,
+        new_location_code: flipped_location_code
+      )
+    else
+      raise Bibdata::Exceptions::LocationUpdateError, "Barcode #{barcode}: Effective location was not found in item "\
+                                                      'or holdings records location fields. Where is it coming from?'
+    end
+
+    Rails.logger.info '------------------------------'
+  end
+
+  def self.merged_marc_record_for_barcode(barcode, flip_location: false) # rubocop:disable Metrics/AbcSize
     item_record = Bibdata::FolioApiClient.instance.find_item_record(barcode: barcode)
     return nil if item_record.nil?
 
-    fetch_folio_records_associated_with_item(item_record) => { location_record:, holdings_record:, source_record: }
+    fetch_folio_records_associated_with_item(item_record) => {
+      location_record:, holdings_record:, source_record:, material_type_record:
+    }
     marc_record = MARC::Record.new_from_hash(source_record['parsedRecord']['content'])
 
     if location_record && flip_location
       current_location_code = location_record.fetch('code')
-      flipped_location_code = Bibdata::OffisteLocationFlipper.location_code_to_recap_flipped_location_code(
-        current_location_code, barcode
+      flipped_location_code = Bibdata::OffsiteLocationFlipper.location_code_to_recap_flipped_location_code(
+        current_location_code, barcode, material_type_record&.fetch('name')
       )
-
-      raise "item_record: #{item_record}"
-      raise "current_location_code: #{current_location_code}, flipped_location_code: #{flipped_location_code}"
 
       # If the current location code does not equal the desired flipped location code,
       # update the item record to point to the new location with the flipped location code.
       if current_location_code != flipped_location_code
-        # TODO: Update item record so that it points to the flipped location
+        perform_location_flip!(location_record, flipped_location_code, item_record, holdings_record)
 
         # And then invoke this method again with `flip_location: false` and return the result.
         return merged_marc_record_for_barcode(barcode, flip_location: false)
+      else
+        Rails.logger.info(
+          "------------------------------\n"\
+          "Barcode #{barcode}: Flipped location matches current effective location, so no flip is needed!\n"\
+          '------------------------------'
+        )
       end
     end
 
@@ -54,10 +107,11 @@ module Bibdata::Scsb
     replace_852_field!(marc_record, holdings_record, location_record)
     remove_fields_with_non_numeric_tags!(marc_record)
 
-    # The commented-out section below is for generating spec fixture files to troubleshoot specific cases.
+    # # The commented-out section below is for generating spec fixture files to troubleshoot specific cases.
     # if Rails.env.development?
     #   Bibdata::FixtureHelper.write_records_to_fixture_dir(
-    #     barcode, item_record, location_record, holdings_record, source_record, marc_record.to_xml.to_s
+    #     barcode, item_record, location_record, holdings_record, material_type_record,
+    #     source_record, marc_record.to_xml.to_s
     #   )
     # end
 

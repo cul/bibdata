@@ -21,7 +21,7 @@ RSpec.describe "Barcodes", type: :request do
     # merged_marc_record_for_barcode will return nil by default
     allow(Bibdata::Scsb).to receive(:merged_marc_record_for_barcode).and_return(nil)
     # merged_marc_record_for_barcode will return a marc record for a valid barcode
-    allow(Bibdata::Scsb).to receive(:merged_marc_record_for_barcode).with(valid_barcode).and_return(marc_record)
+    allow(Bibdata::Scsb).to receive(:merged_marc_record_for_barcode).with(valid_barcode, flip_location: flip_location).and_return(marc_record)
 
     allow(Bibdata::MarcHelpers).to receive(:render_marc_records_as_marc_collection_xml).with(
       [marc_record]
@@ -29,7 +29,10 @@ RSpec.describe "Barcodes", type: :request do
   end
 
   describe "GET /barcode/:barcode/query" do
+    let(:flip_location) { false }
+
     it "returns a 200 OK response for a valid barcode" do
+      puts "REQUEST: #{"/barcode/#{valid_barcode}/query"}"
       get "/barcode/#{valid_barcode}/query"
       expect(response).to have_http_status(:ok)
       expect(response.content_type).to eq("application/xml; charset=utf-8")
@@ -43,6 +46,8 @@ RSpec.describe "Barcodes", type: :request do
   end
 
   describe "POST /barcode/:barcode/update" do
+    let(:flip_location) { true }
+
     let(:headers_with_invalid_authorization_token) do
       { 'Authorization' => "Bearer THIS_IS_AN_INVALID_TOKEN" }
     end
