@@ -39,6 +39,53 @@ RSpec.describe Bibdata::OffsiteLocationFlipper do
       end
     end
 
+    context "specific location flipping rules" do
+      [
+        # Variants that should be reviewed in the future, but we will keep them in place for now
+        [{ location_code: 'avda', barcode: 'AD...' }, 'off,avda'],
+        [{ location_code: 'glx', barcode: 'CU...' }, 'off,glx'],
+        [{ location_code: 'glx', barcode: 'CR...' }, 'off,glx'],
+        [{ location_code: 'glx', barcode: 'RS...' }, 'off,rbx'],
+        [{ location_code: 'msc', barcode: 'MR...' }, 'off,msc'],
+        [{ location_code: 'msr', barcode: 'MR...' }, 'off,msr'],
+        [{ location_code: 'prd', barcode: 'CM...' }, 'off,prd'],
+        [{ location_code: 'mat', barcode: 'CU...' }, 'off,mat'],
+        [{ location_code: 'mat', barcode: 'CR...' }, 'off,mat'],
+        # Avery Special Collections
+        [{ location_code: 'avda,anx2' }, 'off,avda'],
+        [{ location_code: 'avr' }, 'off,avr'],
+        [{ location_code: 'far' }, 'off,far'],
+        [{ location_code: 'vmc' }, 'off,vmc'],
+        # Burke Special Collections
+        [{ location_code: 'uts,arc' }, 'off,uta'],
+        [{ location_code: 'uts,mrld' }, 'off,utmrl'],
+        [{ location_code: 'uts,mrldxf' }, 'off,utmrl'],
+        [{ location_code: 'uts,mrlo' }, 'off,utmrl'],
+        [{ location_code: 'uts,mrloxf' }, 'off,utmrl'],
+        [{ location_code: 'uts,unnr' }, 'off,unr'],
+        [{ location_code: 'uts,unnxxp' }, 'off,utp'],
+        # East Asian Special Collections
+        [{ location_code: 'ean' }, 'off,ean'],
+        [{ location_code: 'ear' }, 'off,ear'],
+        [{ location_code: 'eaa' }, 'off,eaa'],
+        # Health Sciences
+        [{ location_code: '...hs...', barcode: 'HS...' }, 'off,hsl'],
+        [{ location_code: '...hs...', barcode: 'HR...' }, 'off,hsl'],
+        [{ location_code: '...hs...', barcode: 'HX...' }, 'off,hssc'],
+      ].each do |inputs, expected_flipped_location_code|
+        it "inputs: #{inputs.inspect}, expected_flipped_location_code: #{expected_flipped_location_code}" do
+          location_code = inputs[:location_code]
+          barcode = inputs.fetch(:barcode, '_barcode_does_not_matter_for_this_test_')
+          material_type = inputs.fetch(:material_type, '_material_type_does_not_matter_for_this_test_')
+          expect(
+            described_class.location_code_to_recap_flipped_location_code(location_code, barcode, material_type)
+          ).to eq(
+            expected_flipped_location_code
+          )
+        end
+      end
+    end
+
     context "codes for non-Microformat items without a barcode match" do
       {
         'adm' => nil,

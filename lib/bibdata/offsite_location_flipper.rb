@@ -48,9 +48,9 @@ module Bibdata::OffsiteLocationFlipper
     return off('eaa') if location_code == 'eaa'
 
     # Health Sciences
-    return off('hsl') if barcode.start_with?('HS') && location_code.contains?('hs')
-    return off('hsl') if barcode.start_with?('HR') && location_code.contains?('hs')
-    return off('hssc') if barcode.start_with?('HX') && location_code.contains?('hs')
+    return off('hsl') if barcode.start_with?('HS') && location_code.include?('hs')
+    return off('hsl') if barcode.start_with?('HR') && location_code.include?('hs')
+    return off('hssc') if barcode.start_with?('HX') && location_code.include?('hs')
 
     # RBML
     return off('dic') if location_code == 'dic,anx2'
