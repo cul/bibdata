@@ -3,5 +3,7 @@
 require Rails.root.join('config/environments/deployed.rb')
 
 Rails.application.configure do
-  config.log_level = :error
+  # Using :info level logging during initial deployment.
+  # Will eventually change to :error after the process has been running for a while.
+  config.log_level = :info
 end
