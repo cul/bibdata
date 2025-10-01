@@ -96,6 +96,7 @@ module Bibdata::OffsiteLocationFlipper
     return off('bus') if location_code == 'bus,stor'
     return off('docs') if location_code == 'docs'
     return off('glg') if location_code == 'glg,anx2'
+    return off('glg') if location_code == 'glg'
     return off('jou') if location_code == 'jou'
     return off('leh') if location_code == 'leh'
     return off('leh') if location_code == 'leh,anx2'

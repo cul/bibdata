@@ -109,6 +109,7 @@ RSpec.describe Bibdata::OffsiteLocationFlipper do
         [{ location_code: 'bus,stor' }, 'off,bus'],
         [{ location_code: 'docs' }, 'off,docs'],
         [{ location_code: 'glg,anx2' }, 'off,glg'],
+        [{ location_code: 'glg' }, 'off,glg'],
         [{ location_code: 'jou' }, 'off,jou'],
         [{ location_code: 'leh' }, 'off,leh'],
         [{ location_code: 'leh,anx2' }, 'off,leh'],
