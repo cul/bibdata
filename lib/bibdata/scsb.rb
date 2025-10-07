@@ -26,7 +26,8 @@ module Bibdata::Scsb
     }
   end
 
-  def self.perform_location_flip!(current_location_record, flipped_location_code, item_record, holdings_record) # rubocop:disable Metrics/AbcSize
+  # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
+  def self.perform_location_flip!(current_location_record, flipped_location_code, item_record, holdings_record)
     barcode = item_record['barcode']
     current_location_code = current_location_record['code']
 
@@ -85,7 +86,21 @@ module Bibdata::Scsb
     end
 
     Rails.logger.info '------------------------------'
+  rescue Bibdata::Exceptions::LocationNotFoundError => e
+    # This error will come up in one of two cases:
+    #
+    # 1) There is a mistake in the Bibdata::OffsiteLocationFlipper location mapping logic
+    # and it references a flipped location code that does not exist in FOLIO.
+    # or
+    # 2) The Bibdata::OffsiteLocationFlipper location mapping was correct at some point,
+    # but a location code in FOLIO was unexpectedly changed and we either need to update
+    # the location mapping logic or reinstate the old location code in FOLIO.
+    error_message = "Barcode #{barcode}: #{e.message}"
+
+    Rails.logger.error(error_message)
+    BarcodeUpdateErrorMailer.with(barcode: barcode, errors: [error_message]).generate_email.deliver
   end
+  # rubocop:enable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
 
   def self.merged_marc_record_for_barcode(barcode, flip_location: false) # rubocop:disable Metrics/AbcSize
     item_record = Bibdata::FolioApiClient.instance.find_item_record(barcode: barcode)

@@ -190,15 +190,6 @@ RSpec.describe Bibdata::Scsb do
       end
     end
 
-
-
-
-
-
-
-
-
-
     context "when current location equals the holdings temporary location" do
       before do
         holdings_record['temporaryLocationId'] = current_location_record['id']
@@ -229,6 +220,36 @@ RSpec.describe Bibdata::Scsb do
           location_type: :permanent,
           new_location_code: flipped_location_code
         )
+
+        described_class.perform_location_flip!(current_location_record, flipped_location_code, item_record, holdings_record)
+      end
+    end
+
+    context "when the flipped location code is not a valid code (due to a mistake in the location flipping mapping or a missing code in FOLIO)" do
+      before do
+        item_record['permanentLocationId'] = current_location_record['id']
+      end
+
+      let(:location_not_found_error_message) do
+        "Could not update item record permanent location to \"#{flipped_location_code}\". Location code not found."
+      end
+
+      it "does not update the item or holdings locations, logs an error, and sends an error notification email" do
+        allow(Bibdata::FolioApiClient.instance).to receive(:update_item_record_permanent_location).with(
+          item_barcode: barcode,
+          location_type: :permanent,
+          new_location_code: flipped_location_code
+        ).and_raise(
+          Bibdata::Exceptions::LocationNotFoundError,
+          location_not_found_error_message
+        )
+        expect(Bibdata::FolioApiClient.instance).not_to receive(:update_item_parent_holdings_record_permanent_location)
+
+        expect(Rails.logger).to receive(:error).with(
+          /#{Regexp.escape(location_not_found_error_message)}/
+        )
+        expect(BarcodeUpdateErrorMailer).to receive(:with).with(barcode: barcode, errors: [an_instance_of(String)])
+        expect(mail_message_object).to receive(:deliver)
 
         described_class.perform_location_flip!(current_location_record, flipped_location_code, item_record, holdings_record)
       end
