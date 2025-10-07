@@ -28,18 +28,28 @@ module Bibdata::Scsb
 
   def self.perform_location_flip!(current_location_record, flipped_location_code, item_record, holdings_record) # rubocop:disable Metrics/AbcSize
     barcode = item_record['barcode']
+    current_location_code = current_location_record['code']
 
     Rails.logger.info(
       "------------------------------\n"\
       "Barcode #{barcode}: Need to flip effective location "\
-      "#{current_location_record['code']} to #{flipped_location_code}"
+      "#{current_location_code} to #{flipped_location_code.nil? ? 'nil' : flipped_location_code}"
     )
-    if current_location_record['id'] == item_record['temporaryLocationId']
+    if flipped_location_code.nil?
       # This is a data error and we should report it
-      Rails.logger.info(
-        "Barcode #{barcode} problem: Item effectiveLocationId matches item temporaryLocationId. "\
-        'Did not expect to find a value in item temporaryLocationId.'
-      )
+      error_message = "Barcode #{barcode} problem: The current location (#{current_location_code}) could not be "\
+                      'mapped to a flipped location code.  The Bibdata location flipping mapping needs '\
+                      'to be updated to handle this case.'
+
+      Rails.logger.error(error_message)
+      BarcodeUpdateErrorMailer.with(barcode: barcode, errors: [error_message]).generate_email.deliver
+    elsif current_location_record['id'] == item_record['temporaryLocationId']
+      # This is a data error and we should report it
+      error_message = "Barcode #{barcode} problem: Item effectiveLocationId matches item temporaryLocationId. "\
+                      'Did not expect to find a value in item temporaryLocationId.'
+
+      Rails.logger.error(error_message)
+      BarcodeUpdateErrorMailer.with(barcode: barcode, errors: [error_message]).generate_email.deliver
     elsif current_location_record['id'] == item_record['permanentLocationId']
       Rails.logger.info(
         "Barcode #{barcode} update: Updating item permanentLocationId to #{flipped_location_code}."
@@ -50,10 +60,12 @@ module Bibdata::Scsb
         new_location_code: flipped_location_code
       )
     elsif current_location_record['id'] == holdings_record['temporaryLocationId']
-      Rails.logger.info(
-        "Barcode #{barcode} problem: Item effectiveLocationId matches parent holdings temporaryLocationId. "\
-        'Did not expect to find a value in parent holdings temporaryLocationId.'
-      )
+      # This is a data error and we should report it
+      error_message = "Barcode #{barcode} problem: Item effectiveLocationId matches parent holdings "\
+                      'temporaryLocationId. Did not expect to find a value in parent holdings temporaryLocationId.'
+
+      Rails.logger.error(error_message)
+      BarcodeUpdateErrorMailer.with(barcode: barcode, errors: [error_message]).generate_email.deliver
     elsif current_location_record['id'] == holdings_record['permanentLocationId']
       Rails.logger.info(
         "Barcode #{barcode} update: Updating parent holdings permanentLocationId to #{flipped_location_code}."
@@ -64,8 +76,12 @@ module Bibdata::Scsb
         new_location_code: flipped_location_code
       )
     else
-      raise Bibdata::Exceptions::LocationUpdateError, "Barcode #{barcode}: Effective location was not found in item "\
-                                                      'or holdings records location fields. Where is it coming from?'
+      # This is a data error and we should report it
+      error_message = "Barcode #{barcode}: Effective location (#{current_location_code}) was not found in "\
+                      'item or holdings records location fields. Where is it coming from?'
+
+      Rails.logger.error(error_message)
+      BarcodeUpdateErrorMailer.with(barcode: barcode, errors: [error_message]).generate_email.deliver
     end
 
     Rails.logger.info '------------------------------'

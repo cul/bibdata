@@ -71,7 +71,7 @@ RSpec.describe "Barcodes", type: :request do
 
     context "with a valid auth token" do
       let(:headers_with_valid_authorization_token) do
-        { 'Authorization' => "Bearer #{BIBDATA[:barcode_update_api_token]}" }
+        { 'Authorization' => "Bearer #{Rails.application.config.bibdata['barcode_update_api_token']}" }
       end
 
       it "returns a 200 OK response for a valid barcode" do

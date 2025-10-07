@@ -1,5 +1,13 @@
 development:
   barcode_update_api_token: changethis
+  default_sender_email_address: example@example.com
+  barcode_update_error_email_recipients:
+    - example1@example.com
+    - example2@example.com
 
 test:
   barcode_update_api_token: changethis
+  default_sender_email_address: example@example.com
+  barcode_update_error_email_recipients:
+    - example1@example.com
+    - example2@example.com

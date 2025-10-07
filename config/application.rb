@@ -44,6 +44,7 @@ module Bibdata
     config.api_only = true
 
     # Load custom configs
+    config.bibdata = Rails.application.config_for(:bibdata)
     config.folio = config_for(:folio)
   end
 end
