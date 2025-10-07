@@ -32,16 +32,25 @@ RSpec.describe "Barcodes", type: :request do
     let(:flip_location) { false }
 
     it "returns a 200 OK response for a valid barcode" do
-      puts "REQUEST: #{"/barcode/#{valid_barcode}/query"}"
       get "/barcode/#{valid_barcode}/query"
       expect(response).to have_http_status(:ok)
       expect(response.content_type).to eq("application/xml; charset=utf-8")
       expect(response.body).to eq(xml_response)
     end
 
-    it "returns a 404 Not Found response for an invalid barcode" do
+    it "returns a 404 Not Found status, plus informative message, for an invalid barcode" do
       get "/barcode/#{invalid_barcode}/query"
       expect(response).to have_http_status(:not_found)
+      expect(response.body).to eq("Barcode #{invalid_barcode} was not found.")
+    end
+
+    [Faraday::Error, Faraday::UnprocessableEntityError, Faraday::UnauthorizedError].each do |faraday_error_class|
+      it "returns a 500 Internal Server Error, plus informative message, when a #{faraday_error_class} is raised internally" do
+        allow(Bibdata::Scsb).to receive(:merged_marc_record_for_barcode).and_raise(faraday_error_class, "This is a #{faraday_error_class.name}")
+        get "/barcode/#{valid_barcode}/query"
+        expect(response).to have_http_status(:internal_server_error)
+        expect(response.body).to eq("An error occurred while connecting to the backing ILS.")
+      end
     end
   end
 
@@ -81,9 +90,19 @@ RSpec.describe "Barcodes", type: :request do
         expect(response.body).to eq(xml_response)
       end
 
-      it "returns a 404 Not Found response for an invalid barcode" do
+      it "returns a 404 Not Found status, plus informative message, for an invalid barcode" do
         post "/barcode/#{invalid_barcode}/update", params: {}, headers: headers_with_valid_authorization_token
         expect(response).to have_http_status(:not_found)
+        expect(response.body).to eq("Barcode #{invalid_barcode} was not found.")
+      end
+
+      [Faraday::Error, Faraday::UnprocessableEntityError, Faraday::UnauthorizedError].each do |faraday_error_class|
+        it "returns a 500 Internal Server Error, plus informative message, when a #{faraday_error_class} is raised internally" do
+          allow(Bibdata::Scsb).to receive(:merged_marc_record_for_barcode).and_raise(faraday_error_class, "This is a #{faraday_error_class.name}")
+          post "/barcode/#{valid_barcode}/update", params: {}, headers: headers_with_valid_authorization_token
+          expect(response).to have_http_status(:internal_server_error)
+          expect(response.body).to eq("An error occurred while connecting to the backing ILS.")
+        end
       end
     end
   end

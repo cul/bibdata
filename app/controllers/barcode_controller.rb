@@ -3,6 +3,8 @@
 class BarcodeController < ApplicationController
   before_action :authenticate, only: [:update]
 
+  rescue_from Faraday::Error, with: :handle_faraday_error
+
   def query
     barcode = params[:barcode] # Example: 'CU23392169'
     marc_record = nil
@@ -43,5 +45,13 @@ class BarcodeController < ApplicationController
 
   def render_not_found(barcode)
     render plain: "Barcode #{barcode} was not found.", status: :not_found
+  end
+
+  def handle_faraday_error(exception)
+    Rails.logger.error(
+      "Returning 500 status because an unexpected #{exception.class.name} occurred: "\
+      "#{exception.message}\n\t#{exception.backtrace.join("\n\t")}"
+    )
+    render plain: 'An error occurred while connecting to the backing ILS.', status: :internal_server_error
   end
 end
