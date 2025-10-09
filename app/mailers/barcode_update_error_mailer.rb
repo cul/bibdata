@@ -6,7 +6,7 @@ class BarcodeUpdateErrorMailer < ApplicationMailer
 
     mail(
       to: Rails.configuration.bibdata['barcode_update_error_email_recipients'],
-      subject: "Bibdata Error - Problem updating item record with barcode #{params[:barcode]}",
+      subject: "Bibdata Error - Problem with item record (barcode #{params[:barcode]})",
       body: body_content,
       content_type: 'text/plain'
     )
