@@ -5,4 +5,5 @@ module Bibdata::Exceptions
 
   class LocationNotFoundError < BibdataError; end
   class LocationUpdateError < BibdataError; end
+  class UnresolvableHoldingsPermanentLocationError < BibdataError; end
 end
