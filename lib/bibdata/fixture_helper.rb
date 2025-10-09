@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
 module Bibdata::FixtureHelper
-  def self.write_records_to_fixture_dir(barcode, item_record, location_record, holdings_record, material_type_record,
-                                        source_record, generated_scsb_marc_xml_string)
+  def self.write_records_to_fixture_dir(barcode, item_record, holdings_record, holdings_permanent_location_record,
+                                        material_type_record, source_record, generated_scsb_marc_xml_string)
     base_dir = Rails.root.join("spec/fixtures/sample-records/#{barcode}")
     FileUtils.mkdir_p(base_dir)
     File.binwrite(File.join(base_dir, "#{barcode}-item-record.json"), JSON.generate(item_record))
-    File.binwrite(File.join(base_dir, "#{barcode}-location-record.json"), JSON.generate(location_record))
+    File.binwrite(File.join(base_dir, "#{barcode}-holdings-permanent-location-record.json"),
+                  JSON.generate(holdings_permanent_location_record))
     File.binwrite(File.join(base_dir, "#{barcode}-holdings-record.json"), JSON.generate(holdings_record))
     File.binwrite(File.join(base_dir, "#{barcode}-material-type-record.json"), JSON.generate(material_type_record))
     File.binwrite(File.join(base_dir, "#{barcode}-source-record.json"), JSON.generate(source_record))

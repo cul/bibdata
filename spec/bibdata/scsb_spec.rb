@@ -6,7 +6,7 @@ RSpec.describe Bibdata::Scsb do
 
   describe '.merged_marc_record_for_barcode' do
     let(:item_record) { JSON.parse(File.read(File.join(barcode_fixture_base_dir, "#{barcode}-item-record.json"))) }
-    let(:location_record) { JSON.parse(File.read(File.join(barcode_fixture_base_dir, "#{barcode}-location-record.json"))) }
+    let(:location_record) { JSON.parse(File.read(File.join(barcode_fixture_base_dir, "#{barcode}-holdings-permanent-location-record.json"))) }
     let(:holdings_record) { JSON.parse(File.read(File.join(barcode_fixture_base_dir, "#{barcode}-holdings-record.json"))) }
     let(:material_type_record) { JSON.parse(File.read(File.join(barcode_fixture_base_dir, "#{barcode}-material-type-record.json"))) }
     let(:source_record) { JSON.parse(File.read(File.join(barcode_fixture_base_dir, "#{barcode}-source-record.json"))) }
@@ -27,13 +27,22 @@ RSpec.describe Bibdata::Scsb do
           allow(Bibdata::FolioApiClient.instance).to receive(:find_material_type_record).and_return(material_type_record)
         end
         it "generates the expected xml" do
-          marc_record = described_class.merged_marc_record_for_barcode(barcode)
+          marc_record = described_class.merged_marc_record_for_barcode(barcode, flip_location: false)
           generated_xml = Nokogiri::XML(marc_record.to_xml.to_s, &:noblanks).to_xml(indent: 2)
           expect(generated_xml).to eq(expected_xml)
         end
+
+        it "calls the perform_location_flip! method when perform_location_flip is true" do
+          expect(Bibdata::Scsb).to receive(:perform_location_flip!)
+          described_class.merged_marc_record_for_barcode(barcode, flip_location: true)
+        end
+
+        it "does not call the perform_location_flip! method when perform_location_flip is false" do
+          expect(Bibdata::Scsb).not_to receive(:perform_location_flip!)
+          described_class.merged_marc_record_for_barcode(barcode, flip_location: false)
+        end
       end
     end
-
 
     context "when the original record's bibliographic marc data has an 876 $x value of 'Committed'" do
       let(:barcode) { 'CU23392169' }
@@ -76,7 +85,7 @@ RSpec.describe Bibdata::Scsb do
       end
 
       it "generates the expected xml, which has an 876 $x value of 'Committed'" do
-        marc_record = described_class.merged_marc_record_for_barcode(barcode)
+        marc_record = described_class.merged_marc_record_for_barcode(barcode, flip_location: false)
         generated_xml = Nokogiri::XML(marc_record.to_xml.to_s, &:noblanks).to_xml(indent: 2)
         expect(generated_xml).to eq(expected_xml)
       end
@@ -104,25 +113,26 @@ RSpec.describe Bibdata::Scsb do
         allow(Bibdata::FolioApiClient.instance).to receive(:find_source_record).and_return(source_record)
       end
 
-      it "generates the expected xml, skipping location info (and not raising an exception)" do
-        marc_record = nil
+      it "raises an exception" do
         expect {
-          marc_record = described_class.merged_marc_record_for_barcode(barcode)
-        }.not_to raise_error
-        generated_xml = Nokogiri::XML(marc_record.to_xml.to_s, &:noblanks).to_xml(indent: 2)
-        expect(generated_xml).to eq(expected_xml)
+          described_class.merged_marc_record_for_barcode(barcode, flip_location: false)
+        }.to raise_error(Bibdata::Exceptions::UnresolvableHoldingsPermanentLocationError)
       end
     end
   end
 
-  describe '.perform_location_flip!' do
-    let(:current_location_record) {
-      JSON.parse(File.read(File.join(fixtures_base_dir, "ave4off-location-record.json")))
-    }
+  describe 'location flipping logic' do
     let(:barcode) { 'CU23392169' }
     let(:item_record) { JSON.parse(File.read(File.join(barcode_fixture_base_dir, "#{barcode}-item-record.json"))) }
     let(:holdings_record) { JSON.parse(File.read(File.join(barcode_fixture_base_dir, "#{barcode}-holdings-record.json"))) }
-    let(:flipped_location_code) { 'off,ave' }
+
+    let(:current_holdings_permanent_location_record) {
+      JSON.parse(File.read(File.join(fixtures_base_dir, "ave4off-location-record.json")))
+    }
+    let(:current_holdings_permanent_location_code) {
+      current_holdings_permanent_location_record['code']
+    }
+    let(:material_type_name) { 'Book' }
 
     let(:mail_message_object) do
       dbl = instance_double(Mail::Message)
@@ -136,123 +146,178 @@ RSpec.describe Bibdata::Scsb do
     end
 
     before do
-      allow(BarcodeUpdateErrorMailer).to receive(:with).with(barcode: barcode, errors: [an_instance_of(String)]).and_return(barcode_update_error_mailer)
+      allow(BarcodeUpdateErrorMailer).to receive(:with).with(
+        barcode: barcode, errors: an_instance_of(Array)
+      ).and_return(barcode_update_error_mailer)
     end
 
-    context "when flipped_location_code is nil" do
-      let(:flipped_location_code) { nil }
-
-      it "does not update the item or holdings locations, logs an error, and sends an error notification email" do
-        expect(Bibdata::FolioApiClient.instance).not_to receive(:update_item_record_permanent_location)
-        expect(Bibdata::FolioApiClient.instance).not_to receive(:update_item_parent_holdings_record_permanent_location)
-        expect(Rails.logger).to receive(:error).with(
-          /The current location \(ave4off\) could not be mapped to a flipped location code/
+    describe '.perform_location_flip!' do
+      it 'calls the expected methods with the expected parameters' do
+        expect(Bibdata::Scsb).to receive(:update_holdings_permanent_location_if_required!).with(
+          barcode, current_holdings_permanent_location_code, material_type_name
         )
+        expect(Bibdata::Scsb).to receive(:clear_item_permanent_location_if_present!).with(
+          barcode, item_record
+        )
+        expect(Bibdata::Scsb).to receive(:send_notification_email_if_temporary_locations_found).with(
+          barcode, item_record, holdings_record
+        )
+
+        Bibdata::Scsb.perform_location_flip!(
+          barcode, item_record, holdings_record, current_holdings_permanent_location_code, material_type_name
+        )
+      end
+    end
+
+    describe '.update_holdings_permanent_location_if_required!' do
+      let(:flipped_location_code) { 'off,ave' }
+      it  'performs a holdings permanent location update if the current holdings permanent location '\
+          'is different from the flipped code' do
+        allow(Bibdata::OffsiteLocationFlipper).to receive(
+          :location_code_to_recap_flipped_location_code
+        ).and_return(flipped_location_code)
+
+        expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Trying to change parent holdings permanent location/)
+        expect(Bibdata::FolioApiClient.instance).to receive(
+          :update_item_parent_holdings_record_permanent_location
+        ).with(
+          item_barcode: barcode, location_type: :permanent, new_location_code: flipped_location_code
+        )
+        expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Changed parent holdings permanent location/)
+
+        Bibdata::Scsb.update_holdings_permanent_location_if_required!(
+          barcode, current_holdings_permanent_location_code, material_type_name
+        )
+      end
+
+      it 'does not perform an update if current holdings permanent location code equals the flipped code' do
+        allow(Bibdata::OffsiteLocationFlipper).to receive(
+          :location_code_to_recap_flipped_location_code
+        ).and_return(current_holdings_permanent_location_code)
+
+        expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/No holdings permanent location flip needed/)
+        expect(Bibdata::FolioApiClient.instance).not_to receive(:update_item_parent_holdings_record_permanent_location)
+
+        Bibdata::Scsb.update_holdings_permanent_location_if_required!(
+          barcode, current_holdings_permanent_location_code, material_type_name
+        )
+      end
+
+      it  'does not perform an update if the current location cannot be mapped to a flipped location, '\
+          'and it sends an email notification' do
+        allow(Bibdata::OffsiteLocationFlipper).to receive(
+          :location_code_to_recap_flipped_location_code
+        ).and_return(nil)
+
+        expect(Bibdata::FolioApiClient.instance).not_to receive(
+          :update_item_parent_holdings_record_permanent_location
+        )
+
+        expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Unable to map current location to flipped location/)
         expect(BarcodeUpdateErrorMailer).to receive(:with).with(barcode: barcode, errors: [an_instance_of(String)])
-        expect(mail_message_object).to receive(:deliver)
 
-        described_class.perform_location_flip!(current_location_record, flipped_location_code, item_record, holdings_record)
-      end
-    end
-
-    context "when current location equals the item temporary location" do
-      before do
-        item_record['temporaryLocationId'] = current_location_record['id']
-      end
-
-      it "does not update the item or holdings locations, logs an error, and sends an error notification email" do
-        expect(Bibdata::FolioApiClient.instance).not_to receive(:update_item_record_permanent_location)
-        expect(Bibdata::FolioApiClient.instance).not_to receive(:update_item_parent_holdings_record_permanent_location)
-        expect(Rails.logger).to receive(:error).with(
-          /problem: Item effectiveLocationId matches item temporaryLocationId/
+        Bibdata::Scsb.update_holdings_permanent_location_if_required!(
+          barcode, current_holdings_permanent_location_code, material_type_name
         )
+      end
+
+      it  'properly handles the case when update_item_parent_holdings_record_permanent_location '\
+          'raises a Bibdata::Exceptions::LocationNotFoundError' do
+        allow(Bibdata::OffsiteLocationFlipper).to receive(
+          :location_code_to_recap_flipped_location_code
+        ).and_return(flipped_location_code)
+        error_message = 'But something went wrong!'
+        allow(Bibdata::FolioApiClient.instance).to receive(
+          :update_item_parent_holdings_record_permanent_location
+        ).and_raise(Bibdata::Exceptions::LocationNotFoundError, error_message)
+
+        expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Trying to change parent holdings permanent location/)
+        expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/#{Regexp.escape(error_message)}/)
         expect(BarcodeUpdateErrorMailer).to receive(:with).with(barcode: barcode, errors: [an_instance_of(String)])
-        expect(mail_message_object).to receive(:deliver)
 
-        described_class.perform_location_flip!(current_location_record, flipped_location_code, item_record, holdings_record)
-      end
-    end
-
-    context "when current location equals the item permanent location" do
-      before do
-        item_record['permanentLocationId'] = current_location_record['id']
-      end
-
-      it "updates the item permanent location and does not modify the holdings location" do
-        expect(Bibdata::FolioApiClient.instance).to receive(:update_item_record_permanent_location).with(
-          item_barcode: barcode,
-          location_type: :permanent,
-          new_location_code: flipped_location_code
+        Bibdata::Scsb.update_holdings_permanent_location_if_required!(
+          barcode, current_holdings_permanent_location_code, material_type_name
         )
-        expect(Bibdata::FolioApiClient.instance).not_to receive(:update_item_parent_holdings_record_permanent_location)
-
-        described_class.perform_location_flip!(current_location_record, flipped_location_code, item_record, holdings_record)
       end
     end
 
-    context "when current location equals the holdings temporary location" do
-      before do
-        holdings_record['temporaryLocationId'] = current_location_record['id']
+    describe '.clear_item_permanent_location_if_present!' do
+      it 'clears the item permanent location if the item currently has a permanent location' do
+
+        expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Trying to clear item permanent location/)
+        expect(Bibdata::FolioApiClient.instance).to receive(
+          :update_item_record_permanent_location
+        ).with(
+          item_barcode: barcode, location_type: :permanent, new_location_code: nil
+        )
+        expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Cleared item permanent location/)
+
+        Bibdata::Scsb.clear_item_permanent_location_if_present!(
+          barcode, item_record
+        )
       end
 
-      it "does not update the item or holdings locations, logs an error, and sends an error notification email" do
+      it 'does not try to clear the item permanent location if the item does not currently have a permanent location' do
+        item_record['permanentLocationId'] = nil
         expect(Bibdata::FolioApiClient.instance).not_to receive(:update_item_record_permanent_location)
-        expect(Bibdata::FolioApiClient.instance).not_to receive(:update_item_parent_holdings_record_permanent_location)
-        expect(Rails.logger).to receive(:error).with(
-          /problem: Item effectiveLocationId matches parent holdings temporaryLocationId/
+        Bibdata::Scsb.clear_item_permanent_location_if_present!(
+          barcode, item_record
         )
-        expect(BarcodeUpdateErrorMailer).to receive(:with).with(barcode: barcode, errors: [an_instance_of(String)])
-        expect(mail_message_object).to receive(:deliver)
-
-        described_class.perform_location_flip!(current_location_record, flipped_location_code, item_record, holdings_record)
       end
     end
 
-    context "when current location equals the holdings permanent location" do
-      before do
-        holdings_record['permanentLocationId'] = current_location_record['id']
+    describe '.send_notification_email_if_temporary_locations_found' do
+      it 'sends an email with one error if the item has a temporary location set' do
+        item_record['temporaryLocationId'] = 'some-location-id'
+        holdings_record.delete('temporaryLocationId')
+        expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Found unwanted item temporary location/)
+        expect(BarcodeUpdateErrorMailer).to receive(:with).with(barcode: barcode, errors: [an_instance_of(String)])
+        Bibdata::Scsb.send_notification_email_if_temporary_locations_found(
+          barcode, item_record, holdings_record
+        )
       end
 
-      it "updates the holdings permanent location and does not modify the item location" do
-        expect(Bibdata::FolioApiClient.instance).not_to receive(:update_item_record_permanent_location)
-        expect(Bibdata::FolioApiClient.instance).to receive(:update_item_parent_holdings_record_permanent_location).with(
-          item_barcode: barcode,
-          location_type: :permanent,
-          new_location_code: flipped_location_code
+      it "sends an email with one error if the item's parent holdings record has a temporary location set" do
+        item_record.delete('temporaryLocationId')
+        holdings_record['temporaryLocationId'] = 'some-location-id'
+        expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Found unwanted parent holdings temporary location/)
+        expect(BarcodeUpdateErrorMailer).to receive(:with).with(barcode: barcode, errors: [an_instance_of(String)])
+        Bibdata::Scsb.send_notification_email_if_temporary_locations_found(
+          barcode, item_record, holdings_record
         )
+      end
 
-        described_class.perform_location_flip!(current_location_record, flipped_location_code, item_record, holdings_record)
+      it "sends an email with two errors if the item and its parent holdings record both have temporary locations set" do
+        item_record['temporaryLocationId'] = 'some-location-id'
+        holdings_record['temporaryLocationId'] = 'some-location-id'
+
+        expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Found unwanted item temporary location/)
+        expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Found unwanted parent holdings temporary location/)
+        expect(BarcodeUpdateErrorMailer).to receive(:with).with(
+          barcode: barcode, errors: [an_instance_of(String), an_instance_of(String)]
+        )
+        Bibdata::Scsb.send_notification_email_if_temporary_locations_found(
+          barcode, item_record, holdings_record
+        )
+      end
+
+      it 'does not try to send an email if the item and its parent holdings record do not have temporary locations set' do
+        expect(BarcodeUpdateErrorMailer).not_to receive(:with)
+        Bibdata::Scsb.send_notification_email_if_temporary_locations_found(
+          barcode, item_record, holdings_record
+        )
       end
     end
+  end
 
-    context "when the flipped location code is not a valid code (due to a mistake in the location flipping mapping or a missing code in FOLIO)" do
-      before do
-        item_record['permanentLocationId'] = current_location_record['id']
-      end
+  describe '.location_change_logger' do
+    it 'returns a logger' do
+      expect(Bibdata::Scsb.location_change_logger).to be_a(ActiveSupport::Logger)
+    end
 
-      let(:location_not_found_error_message) do
-        "Could not update item record permanent location to \"#{flipped_location_code}\". Location code not found."
-      end
-
-      it "does not update the item or holdings locations, logs an error, and sends an error notification email" do
-        allow(Bibdata::FolioApiClient.instance).to receive(:update_item_record_permanent_location).with(
-          item_barcode: barcode,
-          location_type: :permanent,
-          new_location_code: flipped_location_code
-        ).and_raise(
-          Bibdata::Exceptions::LocationNotFoundError,
-          location_not_found_error_message
-        )
-        expect(Bibdata::FolioApiClient.instance).not_to receive(:update_item_parent_holdings_record_permanent_location)
-
-        expect(Rails.logger).to receive(:error).with(
-          /#{Regexp.escape(location_not_found_error_message)}/
-        )
-        expect(BarcodeUpdateErrorMailer).to receive(:with).with(barcode: barcode, errors: [an_instance_of(String)])
-        expect(mail_message_object).to receive(:deliver)
-
-        described_class.perform_location_flip!(current_location_record, flipped_location_code, item_record, holdings_record)
-      end
+    it 'returns the same logger instance every time' do
+      logger = Bibdata::Scsb.location_change_logger
+      expect(Bibdata::Scsb.location_change_logger).to equal(logger)
     end
   end
 end

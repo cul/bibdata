@@ -52,6 +52,15 @@ RSpec.describe "Barcodes", type: :request do
         expect(response.body).to eq("An error occurred while connecting to the backing ILS.")
       end
     end
+
+    it "returns a 500 Internal Server Error, plus informative message, when a Bibdata::Exceptions::UnresolvableHoldingsPermanentLocationError is raised internally" do
+      allow(Bibdata::Scsb).to receive(:merged_marc_record_for_barcode).and_raise(
+        Bibdata::Exceptions::UnresolvableHoldingsPermanentLocationError, "This is an error."
+      )
+      get "/barcode/#{valid_barcode}/query"
+      expect(response).to have_http_status(:internal_server_error)
+      expect(response.body).to eq("Unable to resolve the holdings permanent location for this record.")
+    end
   end
 
   describe "POST /barcode/:barcode/update" do
@@ -103,6 +112,15 @@ RSpec.describe "Barcodes", type: :request do
           expect(response).to have_http_status(:internal_server_error)
           expect(response.body).to eq("An error occurred while connecting to the backing ILS.")
         end
+      end
+
+      it "returns a 500 Internal Server Error, plus informative message, when a Bibdata::Exceptions::UnresolvableHoldingsPermanentLocationError is raised internally" do
+        allow(Bibdata::Scsb).to receive(:merged_marc_record_for_barcode).and_raise(
+          Bibdata::Exceptions::UnresolvableHoldingsPermanentLocationError, "This is an error."
+        )
+        post "/barcode/#{valid_barcode}/update", params: {}, headers: headers_with_valid_authorization_token
+        expect(response).to have_http_status(:internal_server_error)
+        expect(response.body).to eq("Unable to resolve the holdings permanent location for this record.")
       end
     end
   end

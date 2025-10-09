@@ -4,6 +4,8 @@ class BarcodeController < ApplicationController
   before_action :authenticate, only: [:update]
 
   rescue_from Faraday::Error, with: :handle_faraday_error
+  rescue_from Bibdata::Exceptions::UnresolvableHoldingsPermanentLocationError,
+              with: :unresolvable_holdings_location_error
 
   def query
     barcode = params[:barcode] # Example: 'CU23392169'
@@ -53,5 +55,13 @@ class BarcodeController < ApplicationController
       "#{exception.message}\n\t#{exception.backtrace.join("\n\t")}"
     )
     render plain: 'An error occurred while connecting to the backing ILS.', status: :internal_server_error
+  end
+
+  def unresolvable_holdings_location_error(exception)
+    Rails.logger.error(
+      "Returning 500 status because an unexpected #{exception.class.name} occurred: "\
+      "#{exception.message}\n\t#{exception.backtrace.join("\n\t")}"
+    )
+    render plain: 'Unable to resolve the holdings permanent location for this record.', status: :internal_server_error
   end
 end
