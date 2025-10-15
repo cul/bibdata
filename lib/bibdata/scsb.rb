@@ -81,14 +81,16 @@ module Bibdata::Scsb
   def self.perform_location_flip!(
     barcode, item_record, holdings_record, current_holdings_permanent_location_code, material_type_name
   )
+    # If this item record has a permanent location, we want to clear it.
+    # Do this before updating the holdings location, since a holdings update
+    # will result in an item version update.
+    clear_item_permanent_location_if_present!(barcode, item_record)
+
     # If the current holdings permanent location does not equal the desired flipped location,
     # update the holdings record permanent location to the flipped location.
     update_holdings_permanent_location_if_required!(
       barcode, current_holdings_permanent_location_code, material_type_name
     )
-
-    # If this item record has a permanent location, we want to clear it.
-    clear_item_permanent_location_if_present!(barcode, item_record)
 
     # If this record has a holdings temporary location or item temporary location,
     # send a notification email because assignment of temporary locations is
