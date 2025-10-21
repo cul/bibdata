@@ -166,8 +166,6 @@ module Bibdata::Scsb
       "#{barcode}: Cleared item permanent location "\
       "(was originally FOLIO location #{item_record['permanentLocationId']})"
     )
-
-    sleep 1 # Sleep for a moment to allow the change to propagate
   end
 
   def self.send_notification_email_if_temporary_locations_found(
