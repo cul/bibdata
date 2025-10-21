@@ -31,8 +31,6 @@ class Bibdata::FolioApiClient < FolioApiClient
   def update_item_record_permanent_location(item_barcode:, location_type:, new_location_code:)
     location_field_name = location_field_name_for_type(location_type)
 
-    item_record = Bibdata::FolioApiClient.instance.find_item_record(barcode: item_barcode)
-
     new_location_record = if new_location_code.present?
                             Bibdata::FolioApiClient.instance.find_location_record(code: new_location_code)
                           end
@@ -42,15 +40,22 @@ class Bibdata::FolioApiClient < FolioApiClient
                                                         "\"#{new_location_code}\". Location code not found."
     end
 
-    payload = if new_location_code.blank?
-                # Item record with cleared permanent location value
-                item_record.except(location_field_name)
-              else
-                # Item record with updated permanent location value
-                item_record.merge({ location_field_name => new_location_record['id'] })
-              end
+    with_conflict_error_retry do
+      item_record = Bibdata::FolioApiClient.instance.find_item_record(barcode: item_barcode)
 
-    self.put("/item-storage/items/#{item_record['id']}", payload)
+      # No need to change location if it's already the location that we want
+      return if item_record[location_field_name] == new_location_record&.fetch('id')
+
+      payload = if new_location_code.blank?
+                  # Item record with cleared permanent location value
+                  item_record.except(location_field_name)
+                else
+                  # Item record with updated permanent location value
+                  item_record.merge({ location_field_name => new_location_record['id'] })
+                end
+
+      self.put("/item-storage/items/#{item_record['id']}", payload)
+    end
   rescue Faraday::Error => e
     raise Bibdata::Exceptions::LocationNotFoundError, 'Could not update item record permanent location to '\
                                                       "\"#{new_location_code}\". "\
@@ -65,11 +70,6 @@ class Bibdata::FolioApiClient < FolioApiClient
             'A holdings record permanent location cannot be blank.'
     end
 
-    item_record = Bibdata::FolioApiClient.instance.find_item_record(barcode: item_barcode)
-    holdings_record = Bibdata::FolioApiClient.instance.find_holdings_record(
-      holdings_record_id: item_record['holdingsRecordId']
-    )
-
     new_location_record = if new_location_code.present?
                             Bibdata::FolioApiClient.instance.find_location_record(code: new_location_code)
                           end
@@ -79,19 +79,34 @@ class Bibdata::FolioApiClient < FolioApiClient
                                                         "\"#{new_location_code}\". Location code not found."
     end
 
-    payload = if new_location_code.blank?
-                # Holdings record with cleared permanent location value
-                holdings_record.except(location_field_name)
-              else
-                # Holdings record with updated permanent location value
-                holdings_record.merge({ location_field_name => new_location_record['id'] })
-              end
+    with_conflict_error_retry do
+      item_record = Bibdata::FolioApiClient.instance.find_item_record(barcode: item_barcode)
+      holdings_record = Bibdata::FolioApiClient.instance.find_holdings_record(
+        holdings_record_id: item_record['holdingsRecordId']
+      )
 
-    self.put("/holdings-storage/holdings/#{holdings_record['id']}", payload)
+      # No need to change location if it's already the location that we want
+      return if holdings_record[location_field_name] == new_location_record&.fetch('id')
+
+      payload = if new_location_code.blank?
+                  # Holdings record with cleared permanent location value
+                  holdings_record.except(location_field_name)
+                else
+                  # Holdings record with updated permanent location value
+                  holdings_record.merge({ location_field_name => new_location_record['id'] })
+                end
+      self.put("/holdings-storage/holdings/#{holdings_record['id']}", payload)
+    end
   rescue Faraday::Error => e
     raise Bibdata::Exceptions::LocationNotFoundError, 'Could not update holdings record permanent location to '\
                                                       "\"#{new_location_code}\". "\
                                                       "FOLIO error message: #{e.response[:body]}"
+  end
+
+  # Retry an operation muliple times if we run into an optimistic locking scenario due to an outdated record version.
+  # This is indicated by a Faraday::ConflictError during a request.
+  def with_conflict_error_retry(&block)
+    Retriable.retriable(on: Faraday::ConflictError, tries: 3, base_interval: 3, multiplier: 1, &block)
   end
 end
 # rubocop:enable Metrics/MethodLength,Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity

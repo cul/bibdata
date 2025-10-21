@@ -35,6 +35,9 @@ gem 'nokogiri', '~> 1.18', '>= 1.18.10', force_ruby_platform: true
 # Rainbow for text coloring
 gem "rainbow", "~> 3.0"
 
+# Retriable for retrying operations in response to specific exceptions
+gem 'retriable', '~> 3.1'
+
 # FOLIO Client
 gem "folio_api_client", "~> 0.4.3"
 # gem "folio_api_client", path: "../folio_api_client"
