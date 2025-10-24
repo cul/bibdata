@@ -39,7 +39,7 @@ gem "rainbow", "~> 3.0"
 gem 'retriable', '~> 3.1'
 
 # FOLIO Client
-gem "folio_api_client", "~> 0.4.3"
+gem "folio_api_client", "~> 0.5.0"
 # gem "folio_api_client", path: "../folio_api_client"
 
 group :development, :test do
