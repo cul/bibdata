@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -30,7 +30,7 @@ jobs:
     steps:
       - name: Install libxslt for nokogiri gem (required for ruby platform build)
         run: sudo apt-get install -y libxml2-dev libxslt-dev
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Add --no-document option to .gemrc file to speed up bundle install
         run: "echo 'gem: --no-document' > ~/.gemrc"
       - name: Set up Ruby
