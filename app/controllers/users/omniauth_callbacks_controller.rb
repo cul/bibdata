@@ -30,7 +30,7 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   # POST /users/auth/columbia_cas/callback
   def columbia_cas
     callback_url = user_columbia_cas_omniauth_callback_url # The columbia_cas callback route in this application
-    uid, _affils = Omniauth::Cul::ColumbiaCas.validation_callback(request.params['ticket'], callback_url)
+    uid, affils = Omniauth::Cul::ColumbiaCas.validation_callback(request.params['ticket'], callback_url)
 
     if Omniauth::Cul::PermissionFileValidator.permitted?(uid, affils)
       user = User.find_by(uid: uid) || User.create!(
@@ -42,5 +42,13 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
       flash[:alert] = 'Login attempt failed'
       redirect_to root_path
     end
+  rescue Omniauth::Cul::Exceptions::Error => e
+    # If an unexpected CAS ticket validation occurs, log the error message and ask the user to try
+    # logging in again.  Do not display the exception object's original message to the user because it may
+    # contain information that only a developer should see.
+    error_message = 'CAS login validation failed.  Please try again.'
+    Rails.logger.debug(error_message + "  #{e.class.name}: #{e.message}")
+    flash[:alert] = error_message
+    redirect_to root_path
   end
 end

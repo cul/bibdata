@@ -69,5 +69,5 @@ Rails.application.configure do
   # config.generators.apply_rubocop_autocorrect_after_generate!
 
   # Allow local CAS testing via hyacinth-dev domain
-  config.hosts << 'bibdata-dev.library.columbia.edu'
+  config.hosts << 'bibdata-dev.cul.columbia.edu'
 end
