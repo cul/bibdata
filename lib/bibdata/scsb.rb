@@ -289,7 +289,7 @@ module Bibdata::Scsb
                       when Bibdata::Scsb::Constants::CGD_PRIVATE
                         Bibdata::Scsb::Constants::USE_RESTRICTION_SUPERVISED_USE
                       when Bibdata::Scsb::Constants::CGD_OPEN, Bibdata::Scsb::Constants::CGD_SHARED
-                        '' # Blank value
+                        Bibdata::Scsb::Constants::USE_RESTRICTION_BLANK # No restrictions
                       end
 
     # For certain locations, we override the use restriction to enforce USE_RESTRICTION_IN_LIBRARY_USE
