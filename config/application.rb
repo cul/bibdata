@@ -46,5 +46,10 @@ module Bibdata
     # Load custom configs
     config.bibdata = Rails.application.config_for(:bibdata)
     config.folio = config_for(:folio)
+
+    # Use Resque for ActiveJob
+    config.active_job.queue_adapter = :resque
+    config.active_job.queue_name_prefix = "bibdata.#{Rails.env}"
+    config.active_job.queue_name_delimiter = '.'
   end
 end

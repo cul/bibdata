@@ -38,6 +38,11 @@ gem "rainbow", "~> 3.0"
 # Retriable for retrying operations in response to specific exceptions
 gem 'retriable', '~> 3.1'
 
+# Resque/Redis (for queued jobs)
+gem 'redis', '~> 4.8' # NOTE: Updating the redis gem to v5 breaks the current redis namespace setup
+gem 'redis-namespace', '~> 1.11'
+gem 'resque', '~> 2.6'
+
 # FOLIO Client
 gem "folio_api_client", "~> 0.4.3"
 # gem "folio_api_client", path: "../folio_api_client"

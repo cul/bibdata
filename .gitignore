@@ -34,6 +34,8 @@
 # Ignore config files
 /config/bibdata.yml
 /config/folio.yml
+/config/redis.yml
+/config/resque.yml
 
 # macOS Files
 .DS_Store
