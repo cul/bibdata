@@ -7,8 +7,7 @@ gem "puma", ">= 5.0"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 # gem "jbuilder"
 
-# For ActiveRecord, use sqlite for dev/test databases and mysql for deployed server databases
-gem 'sqlite3', '2.7.2' # 2.7.4 and later require GLIBC 2.29, which is not available on our hosts
+# For ActiveRecord, mysql for deployed server databases
 gem 'mysql2', '~> 0.5.6'
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
@@ -69,6 +68,9 @@ group :development, :test do
   gem "rspec-rails", "~> 8.0"
 
   gem "simplecov", require: false
+
+  # For ActiveRecord, use sqlite for dev/test databases and mysql for deployed server databases
+  gem 'sqlite3', '~> 2.8'
 end
 
 group :development do
