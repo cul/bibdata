@@ -5,8 +5,9 @@ namespace :bibdata do
     task temp_locations: :environment do
       barcodes = ENV['barcodes'].split(',')
 
-      barcodes.each do |barcode|
-        puts "Clearing item and parent temporary locations for: #{barcode}"
+      num_barcodes_to_clear = barcodes.length
+      barcodes.each_with_index do |barcode, i|
+        puts "(#{i + 1} of #{num_barcodes_to_clear}) Clearing item and parent temporary locations for: #{barcode}"
         # Clear item record temporary location
         Bibdata::FolioApiClient.instance.update_item_record_location(
           item_barcode: barcode,
