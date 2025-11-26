@@ -127,7 +127,7 @@ module Bibdata::Scsb
       "#{barcode}: Trying to change parent holdings permanent location from "\
       "#{current_holdings_permanent_location_code} to #{flipped_location_code}"
     )
-    Bibdata::FolioApiClient.instance.update_item_parent_holdings_record_permanent_location(
+    Bibdata::FolioApiClient.instance.update_item_parent_holdings_record_location(
       item_barcode: barcode, location_type: :permanent, new_location_code: flipped_location_code
     )
     self.location_change_logger.unknown(
@@ -159,7 +159,7 @@ module Bibdata::Scsb
       "#{barcode}: Trying to clear item permanent location "\
       "(was originally FOLIO location #{item_record['permanentLocationId']})"
     )
-    Bibdata::FolioApiClient.instance.update_item_record_permanent_location(
+    Bibdata::FolioApiClient.instance.update_item_record_location(
       item_barcode: barcode, location_type: :permanent, new_location_code: nil
     )
     self.location_change_logger.unknown(

@@ -179,7 +179,7 @@ RSpec.describe Bibdata::Scsb do
 
         expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Trying to change parent holdings permanent location/)
         expect(Bibdata::FolioApiClient.instance).to receive(
-          :update_item_parent_holdings_record_permanent_location
+          :update_item_parent_holdings_record_location
         ).with(
           item_barcode: barcode, location_type: :permanent, new_location_code: flipped_location_code
         )
@@ -196,7 +196,7 @@ RSpec.describe Bibdata::Scsb do
         ).and_return(current_holdings_permanent_location_code)
 
         expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/No holdings permanent location flip needed/)
-        expect(Bibdata::FolioApiClient.instance).not_to receive(:update_item_parent_holdings_record_permanent_location)
+        expect(Bibdata::FolioApiClient.instance).not_to receive(:update_item_parent_holdings_record_location)
 
         Bibdata::Scsb.update_holdings_permanent_location_if_required!(
           barcode, current_holdings_permanent_location_code, material_type_name
@@ -210,7 +210,7 @@ RSpec.describe Bibdata::Scsb do
         ).and_return(nil)
 
         expect(Bibdata::FolioApiClient.instance).not_to receive(
-          :update_item_parent_holdings_record_permanent_location
+          :update_item_parent_holdings_record_location
         )
 
         expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Unable to map current location to flipped location/)
@@ -221,14 +221,14 @@ RSpec.describe Bibdata::Scsb do
         )
       end
 
-      it  'properly handles the case when update_item_parent_holdings_record_permanent_location '\
+      it  'properly handles the case when update_item_parent_holdings_record_location '\
           'raises a Bibdata::Exceptions::LocationNotFoundError' do
         allow(Bibdata::OffsiteLocationFlipper).to receive(
           :location_code_to_recap_flipped_location_code
         ).and_return(flipped_location_code)
         error_message = 'But something went wrong!'
         allow(Bibdata::FolioApiClient.instance).to receive(
-          :update_item_parent_holdings_record_permanent_location
+          :update_item_parent_holdings_record_location
         ).and_raise(Bibdata::Exceptions::LocationNotFoundError, error_message)
 
         expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Trying to change parent holdings permanent location/)
@@ -246,7 +246,7 @@ RSpec.describe Bibdata::Scsb do
 
         expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Trying to clear item permanent location/)
         expect(Bibdata::FolioApiClient.instance).to receive(
-          :update_item_record_permanent_location
+          :update_item_record_location
         ).with(
           item_barcode: barcode, location_type: :permanent, new_location_code: nil
         )
@@ -259,7 +259,7 @@ RSpec.describe Bibdata::Scsb do
 
       it 'does not try to clear the item permanent location if the item does not currently have a permanent location' do
         item_record['permanentLocationId'] = nil
-        expect(Bibdata::FolioApiClient.instance).not_to receive(:update_item_record_permanent_location)
+        expect(Bibdata::FolioApiClient.instance).not_to receive(:update_item_record_location)
         Bibdata::Scsb.clear_item_permanent_location_if_present!(
           barcode, item_record
         )
