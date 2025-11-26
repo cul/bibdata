@@ -89,7 +89,7 @@ end
 # Uncomment the following to require manually verifying the host key before first deploy.
 # set :ssh_options, verify_host_key: :secure
 
-after 'deploy:finished', 'bibdata:restart_resque_workers'
+# after 'deploy:finished', 'bibdata:restart_resque_workers'
 
 namespace :bibdata do
   desc 'Restart the resque workers'
