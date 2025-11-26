@@ -1,0 +1,30 @@
+<h1><%= Rails.application.name.capitalize %></h1>
+<p>Version: <%= ::VERSION %></p>
+
+<% if current_user.present? %>
+  <p>You are signed in as: <%= current_user.uid %></p>
+  <p><a href="/resque">View Resque status</a></p>
+  <% # The sign out route uses a DELETE method to prevent CSRF attacks. %>
+  <p>
+    <%= form_with(url: users_sign_out_path, method: "delete") do |form| %>
+      <%= form.submit "Sign out" %>
+    <% end %>
+  </p>
+<% else %>
+  <h2>Sign In</h2>
+
+  <% if Devise.mappings[:user].omniauthable? %>
+    <% User.omniauth_providers.each do |provider| %>
+      <div>
+        <p><%=
+          button_to(
+            "Sign in with #{Devise.omniauth_configs.fetch(provider, nil)&.options&.fetch(:label, nil) || provider.name.to_s.titleize}",
+            omniauth_authorize_path(:user, provider),
+            :class => 'btn btn-primary btn-sm btn-block')
+        %></p>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>
+
+
