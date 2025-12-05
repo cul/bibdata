@@ -22,9 +22,12 @@ set :deploy_to, "/opt/passenger/#{fetch(:deploy_name)}"
 
 # Default value for :linked_files is []
 append  :linked_files,
-        # 'config/database.yml',
+        'config/database.yml',
         'config/bibdata.yml',
         'config/folio.yml',
+        'config/redis.yml',
+        'config/resque.yml',
+        'config/permissions.yml',
         'config/master.key' # we don't use this often, when we do it is for API keys
 
 # Default value for linked_dirs is []
@@ -85,3 +88,23 @@ end
 
 # Uncomment the following to require manually verifying the host key before first deploy.
 # set :ssh_options, verify_host_key: :secure
+
+after 'deploy:finished', 'bibdata:restart_resque_workers'
+
+namespace :bibdata do
+  desc 'Restart the resque workers'
+  task :restart_resque_workers do
+    on roles(:web) do
+      within release_path do
+        with rails_env: fetch(:rails_env) do
+          resque_restart_err_and_out_log = './log/resque_restart_err_and_out.log'
+          # With Ruby > 3.0, we need to redirect stdout and stderr to a file, otherwise
+          # capistrano hangs on this task (waiting for more output).
+          execute :rake, 'resque:restart_workers', '>', resque_restart_err_and_out_log, '2>&1'
+          # Show the restart log output
+          execute :cat, resque_restart_err_and_out_log
+        end
+      end
+    end
+  end
+end

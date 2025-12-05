@@ -6,15 +6,15 @@ require 'rails'
 # Pick the frameworks you want:
 require 'active_model/railtie'
 require 'active_job/railtie'
-# require "active_record/railtie"
+require 'active_record/railtie'
 # require "active_storage/engine"
 require 'action_controller/railtie'
 require 'action_mailer/railtie'
 # require "action_mailbox/engine"
 # require "action_text/engine"
 require 'action_view/railtie'
-require 'action_cable/engine'
-require 'rails/test_unit/railtie'
+# require "action_cable/engine"
+# require "rails/test_unit/railtie"
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -24,6 +24,10 @@ module Bibdata
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.0
+
+    config.generators do |g|
+      g.test_framework :rspec, spec: true
+    end
 
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
@@ -38,13 +42,13 @@ module Bibdata
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
-    # Only loads a smaller set of middleware suitable for API only apps.
-    # Middleware like session, flash, cookies can be added back manually.
-    # Skip views, helpers and assets when generating a new resource.
-    config.api_only = true
-
     # Load custom configs
     config.bibdata = Rails.application.config_for(:bibdata)
     config.folio = config_for(:folio)
+
+    # Use Resque for ActiveJob
+    config.active_job.queue_adapter = :resque
+    config.active_job.queue_name_prefix = "bibdata.#{Rails.env}"
+    config.active_job.queue_name_delimiter = '.'
   end
 end
