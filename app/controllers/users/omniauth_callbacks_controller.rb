@@ -28,7 +28,7 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   end
 
   # POST /users/auth/columbia_cas/callback
-  def columbia_cas
+  def columbia_cas # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
     callback_url = user_columbia_cas_omniauth_callback_url # The columbia_cas callback route in this application
     uid, affils = Omniauth::Cul::ColumbiaCas.validation_callback(request.params['ticket'], callback_url)
 
