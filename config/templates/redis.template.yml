@@ -9,3 +9,4 @@ development:
 
 test:
   <<: *default
+  port: 7379

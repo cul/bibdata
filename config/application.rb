@@ -43,11 +43,11 @@ module Bibdata
     # config.eager_load_paths << Rails.root.join("extras")
 
     # Load custom configs
-    config.bibdata = Rails.application.config_for(:bibdata)
+    config.bibdata = config_for(:bibdata)
     config.folio = config_for(:folio)
 
     # Use Resque for ActiveJob
-    config.active_job.queue_adapter = :resque
+    config.active_job.queue_adapter = Rails.application.config_for(:resque)[:run_jobs_inline] ? :inline : :resque
     config.active_job.queue_name_prefix = "bibdata.#{Rails.env}"
     config.active_job.queue_name_delimiter = '.'
   end

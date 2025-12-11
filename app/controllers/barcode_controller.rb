@@ -2,6 +2,7 @@
 
 class BarcodeController < ApplicationController
   before_action :authenticate, only: [:update]
+  skip_before_action :verify_authenticity_token, only: [:update] # No need for CSRF token for API token auth endpoint
 
   rescue_from Faraday::Error, with: :handle_faraday_error
   rescue_from Bibdata::Exceptions::UnresolvableHoldingsPermanentLocationError,
