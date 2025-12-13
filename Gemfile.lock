@@ -285,7 +285,10 @@ GEM
       erb
       psych (>= 4.0.0)
       tsort
-    redis (4.8.1)
+    redis (5.4.1)
+      redis-client (>= 0.22.0)
+    redis-client (0.26.2)
+      connection_pool
     redis-namespace (1.11.0)
       redis (>= 4)
     regexp_parser (2.11.2)
@@ -448,7 +451,7 @@ DEPENDENCIES
   puma (>= 5.0)
   rails (~> 8.0.2)
   rainbow (~> 3.0)
-  redis (~> 4.8)
+  redis (~> 5.4)
   redis-namespace (~> 1.11)
   resque (~> 2.6)
   retriable (~> 3.1)
