@@ -156,15 +156,10 @@ RSpec.describe Bibdata::Scsb do
         expect(Bibdata::Scsb).to receive(:update_holdings_permanent_location_if_required!).with(
           barcode, current_holdings_permanent_location_code, material_type_name
         )
-        expect(Bibdata::Scsb).to receive(:clear_item_permanent_location_if_present!).with(
-          barcode, item_record
-        )
-        expect(Bibdata::Scsb).to receive(:send_notification_email_if_temporary_locations_found).with(
-          barcode, item_record, holdings_record
-        )
+        expect(LocationCleanupJob).to receive(:perform_later).with(barcode)
 
         Bibdata::Scsb.perform_location_flip!(
-          barcode, item_record, holdings_record, current_holdings_permanent_location_code, material_type_name
+          barcode, current_holdings_permanent_location_code, material_type_name
         )
       end
     end
@@ -241,73 +236,48 @@ RSpec.describe Bibdata::Scsb do
       end
     end
 
-    describe '.clear_item_permanent_location_if_present!' do
-      it 'clears the item permanent location if the item currently has a permanent location' do
+    # describe '.send_notification_email_if_temporary_locations_found' do
+    #   it 'sends an email with one error if the item has a temporary location set' do
+    #     item_record['temporaryLocationId'] = 'some-location-id'
+    #     holdings_record.delete('temporaryLocationId')
+    #     expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Found unwanted item temporary location/)
+    #     expect(BarcodeUpdateErrorMailer).to receive(:with).with(barcode: barcode, errors: [an_instance_of(String)])
+    #     Bibdata::Scsb.send_notification_email_if_temporary_locations_found(
+    #       barcode, item_record, holdings_record
+    #     )
+    #   end
 
-        expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Trying to clear item permanent location/)
-        expect(Bibdata::FolioApiClient.instance).to receive(
-          :update_item_record_location
-        ).with(
-          item_barcode: barcode, location_type: :permanent, new_location_code: nil
-        )
-        expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Cleared item permanent location/)
+    #   it "sends an email with one error if the item's parent holdings record has a temporary location set" do
+    #     item_record.delete('temporaryLocationId')
+    #     holdings_record['temporaryLocationId'] = 'some-location-id'
+    #     expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Found unwanted parent holdings temporary location/)
+    #     expect(BarcodeUpdateErrorMailer).to receive(:with).with(barcode: barcode, errors: [an_instance_of(String)])
+    #     Bibdata::Scsb.send_notification_email_if_temporary_locations_found(
+    #       barcode, item_record, holdings_record
+    #     )
+    #   end
 
-        Bibdata::Scsb.clear_item_permanent_location_if_present!(
-          barcode, item_record
-        )
-      end
+    #   it "sends an email with two errors if the item and its parent holdings record both have temporary locations set" do
+    #     item_record['temporaryLocationId'] = 'some-location-id'
+    #     holdings_record['temporaryLocationId'] = 'some-location-id'
 
-      it 'does not try to clear the item permanent location if the item does not currently have a permanent location' do
-        item_record['permanentLocationId'] = nil
-        expect(Bibdata::FolioApiClient.instance).not_to receive(:update_item_record_location)
-        Bibdata::Scsb.clear_item_permanent_location_if_present!(
-          barcode, item_record
-        )
-      end
-    end
+    #     expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Found unwanted item temporary location/)
+    #     expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Found unwanted parent holdings temporary location/)
+    #     expect(BarcodeUpdateErrorMailer).to receive(:with).with(
+    #       barcode: barcode, errors: [an_instance_of(String), an_instance_of(String)]
+    #     )
+    #     Bibdata::Scsb.send_notification_email_if_temporary_locations_found(
+    #       barcode, item_record, holdings_record
+    #     )
+    #   end
 
-    describe '.send_notification_email_if_temporary_locations_found' do
-      it 'sends an email with one error if the item has a temporary location set' do
-        item_record['temporaryLocationId'] = 'some-location-id'
-        holdings_record.delete('temporaryLocationId')
-        expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Found unwanted item temporary location/)
-        expect(BarcodeUpdateErrorMailer).to receive(:with).with(barcode: barcode, errors: [an_instance_of(String)])
-        Bibdata::Scsb.send_notification_email_if_temporary_locations_found(
-          barcode, item_record, holdings_record
-        )
-      end
-
-      it "sends an email with one error if the item's parent holdings record has a temporary location set" do
-        item_record.delete('temporaryLocationId')
-        holdings_record['temporaryLocationId'] = 'some-location-id'
-        expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Found unwanted parent holdings temporary location/)
-        expect(BarcodeUpdateErrorMailer).to receive(:with).with(barcode: barcode, errors: [an_instance_of(String)])
-        Bibdata::Scsb.send_notification_email_if_temporary_locations_found(
-          barcode, item_record, holdings_record
-        )
-      end
-
-      it "sends an email with two errors if the item and its parent holdings record both have temporary locations set" do
-        item_record['temporaryLocationId'] = 'some-location-id'
-        holdings_record['temporaryLocationId'] = 'some-location-id'
-
-        expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Found unwanted item temporary location/)
-        expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Found unwanted parent holdings temporary location/)
-        expect(BarcodeUpdateErrorMailer).to receive(:with).with(
-          barcode: barcode, errors: [an_instance_of(String), an_instance_of(String)]
-        )
-        Bibdata::Scsb.send_notification_email_if_temporary_locations_found(
-          barcode, item_record, holdings_record
-        )
-      end
-
-      it 'does not try to send an email if the item and its parent holdings record do not have temporary locations set' do
-        expect(BarcodeUpdateErrorMailer).not_to receive(:with)
-        Bibdata::Scsb.send_notification_email_if_temporary_locations_found(
-          barcode, item_record, holdings_record
-        )
-      end
-    end
+    #   it 'does not try to send an email if the item and its parent holdings record do not have temporary locations set' do
+    #     expect(BarcodeUpdateErrorMailer).not_to receive(:with)
+    #     Bibdata::Scsb.send_notification_email_if_temporary_locations_found(
+    #       barcode, item_record, holdings_record
+    #     )
+    #   end
+    # end
   end
 
   describe '.location_change_logger' do

@@ -59,7 +59,7 @@ class Bibdata::FolioApiClient < FolioApiClient # rubocop:disable Metrics/ClassLe
   rescue Faraday::Error => e
     raise Bibdata::Exceptions::LocationNotFoundError, 'Could not update item record permanent location to '\
                                                       "\"#{new_location_code}\". "\
-                                                      "FOLIO error message: #{e.response[:body]}"
+                                                      "FOLIO error message: #{e.response&.fetch(:body) || e.message}"
   end
 
   def update_item_parent_holdings_record_location(item_barcode:, location_type:, new_location_code:)
@@ -100,7 +100,7 @@ class Bibdata::FolioApiClient < FolioApiClient # rubocop:disable Metrics/ClassLe
   rescue Faraday::Error => e
     raise Bibdata::Exceptions::LocationNotFoundError, 'Could not update holdings record permanent location to '\
                                                       "\"#{new_location_code}\". "\
-                                                      "FOLIO error message: #{e.response[:body]}"
+                                                      "FOLIO error message: #{e.response&.fetch(:body) || e.message}"
   end
 
   def clear_item_record_temporary_location(item_barcode:, location_type:, new_location_code:)

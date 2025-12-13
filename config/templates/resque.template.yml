@@ -1,4 +1,5 @@
 default: &default
+  run_jobs_inline: false
   workers:
     '*' : 1
   polling_interval: 5
@@ -9,6 +10,7 @@ development:
 
 test:
   <<: *default
+  run_jobs_inline: true
 
 production:
   <<: *default

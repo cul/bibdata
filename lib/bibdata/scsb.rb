@@ -53,8 +53,7 @@ module Bibdata::Scsb
 
     if flip_location
       perform_location_flip!(
-        barcode, item_record, holdings_record,
-        current_holdings_permanent_location_code, material_type_record&.fetch('name')
+        barcode, current_holdings_permanent_location_code, material_type_record&.fetch('name')
       )
 
       # After performing a flip, invoke this method again with `flip_location: false` to retrieve the latest updated
@@ -79,23 +78,15 @@ module Bibdata::Scsb
   end
 
   def self.perform_location_flip!(
-    barcode, item_record, holdings_record, current_holdings_permanent_location_code, material_type_name
+    barcode, current_holdings_permanent_location_code, material_type_name
   )
-    # If this item record has a permanent location, we want to clear it.
-    # Do this before updating the holdings location, since a holdings update
-    # will result in an item version update.
-    clear_item_permanent_location_if_present!(barcode, item_record)
-
     # If the current holdings permanent location does not equal the desired flipped location,
     # update the holdings record permanent location to the flipped location.
     update_holdings_permanent_location_if_required!(
       barcode, current_holdings_permanent_location_code, material_type_name
     )
 
-    # If this record has a holdings temporary location or item temporary location,
-    # send a notification email because assignment of temporary locations is
-    # undesirable for us and that needs to be manually corrected.
-    send_notification_email_if_temporary_locations_found(barcode, item_record, holdings_record)
+    LocationCleanupJob.perform_later(barcode)
   end
 
   # rubocop:disable Metrics/AbcSize
@@ -152,43 +143,27 @@ module Bibdata::Scsb
   end
   # rubocop:enable Metrics/AbcSize
 
-  def self.clear_item_permanent_location_if_present!(barcode, item_record)
-    return if item_record['permanentLocationId'].blank?
+  # def self.send_notification_email_if_temporary_locations_found(
+  #   barcode, item_record, holdings_record
+  # )
+  #   temporary_location_notification_messages = []
+  #   if item_record['temporaryLocationId'].present?
+  #     error_message = 'Found unwanted item temporary location.'
+  #     self.location_change_logger.unknown("#{barcode}: #{error_message}")
+  #     temporary_location_notification_messages << error_message
+  #   end
+  #   if holdings_record['temporaryLocationId'].present?
+  #     error_message = 'Found unwanted parent holdings temporary location.'
+  #     self.location_change_logger.unknown("#{barcode}: #{error_message}")
+  #     temporary_location_notification_messages << error_message
+  #   end
 
-    self.location_change_logger.unknown(
-      "#{barcode}: Trying to clear item permanent location "\
-      "(was originally FOLIO location #{item_record['permanentLocationId']})"
-    )
-    Bibdata::FolioApiClient.instance.update_item_record_location(
-      item_barcode: barcode, location_type: :permanent, new_location_code: nil
-    )
-    self.location_change_logger.unknown(
-      "#{barcode}: Cleared item permanent location "\
-      "(was originally FOLIO location #{item_record['permanentLocationId']})"
-    )
-  end
+  #   return if temporary_location_notification_messages.empty?
 
-  def self.send_notification_email_if_temporary_locations_found(
-    barcode, item_record, holdings_record
-  )
-    temporary_location_notification_messages = []
-    if item_record['temporaryLocationId'].present?
-      error_message = 'Found unwanted item temporary location.'
-      self.location_change_logger.unknown("#{barcode}: #{error_message}")
-      temporary_location_notification_messages << error_message
-    end
-    if holdings_record['temporaryLocationId'].present?
-      error_message = 'Found unwanted parent holdings temporary location.'
-      self.location_change_logger.unknown("#{barcode}: #{error_message}")
-      temporary_location_notification_messages << error_message
-    end
-
-    return if temporary_location_notification_messages.empty?
-
-    BarcodeUpdateErrorMailer.with(
-      barcode: barcode, errors: temporary_location_notification_messages
-    ).generate_email.deliver
-  end
+  #   BarcodeUpdateErrorMailer.with(
+  #     barcode: barcode, errors: temporary_location_notification_messages
+  #   ).generate_email.deliver
+  # end
 
   # Returns the value if present, otherwise returns nil.
   def self.get_original_876_x_value(marc_record)
