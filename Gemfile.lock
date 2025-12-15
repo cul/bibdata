@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/cul/omniauth-cul
-  revision: 77d4f9cc4417bcb383a19f994dd69ea3067b7d25
+  revision: 76702035a8a0929a88a938107ade38ab9d1c5cde
   ref: improved-implementation
   specs:
     omniauth-cul (0.2.0)
@@ -151,7 +151,7 @@ GEM
     hashie (5.0.0)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
-    io-console (0.8.1)
+    io-console (0.8.2)
     irb (1.15.3)
       pp (>= 0.6.0)
       rdoc (>= 4.0.0)
