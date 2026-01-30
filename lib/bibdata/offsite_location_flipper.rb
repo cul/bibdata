@@ -80,12 +80,16 @@ module Bibdata::OffsiteLocationFlipper
     # Avery General Collections
     return off('ave') if location_code == 'ave' && barcode.start_with?('AR')
     return off('ave') if location_code == 'ave,anx2'
-    return off('ave') if location_code == 'avelc'
+    return off('avec') if location_code == 'avelc'
     return off('ave') if location_code == 'avelcn'
     return off('fax') if location_code == 'fax' && barcode.start_with?('AR')
     return off('fax') if location_code == 'fax,anx2'
-    return off('fax') if location_code == 'faxlc'
+    return off('faxc') if location_code == 'faxlc'
     return off('fax') if location_code == 'faxlcn'
+    return off('avec') if location_code == 'ave' && barcode.start_with?('CU')
+    return off('avec') if location_code == 'avelc' && barcode.start_with?('CU')
+    return off('faxc') if location_code == 'fax' && barcode.start_with?('CU')
+    return off('faxc') if location_code == 'faxlc' && barcode.start_with?('CU')
     return off('war') if location_code == 'war' && barcode.start_with?('CU')
     return off('war') if location_code == 'war,anx2'
 

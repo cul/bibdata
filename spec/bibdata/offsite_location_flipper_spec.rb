@@ -94,12 +94,16 @@ RSpec.describe Bibdata::OffsiteLocationFlipper do
         # Avery General Collections
         [{ location_code: 'ave', barcode: 'AR...' }, 'off,ave'],
         [{ location_code: 'ave,anx2' }, 'off,ave'],
-        [{ location_code: 'avelc' }, 'off,ave'],
+        [{ location_code: 'avelc' }, 'off,avec'],
         [{ location_code: 'avelcn' }, 'off,ave'],
         [{ location_code: 'fax', barcode: 'AR...' }, 'off,fax'],
         [{ location_code: 'fax,anx2' }, 'off,fax'],
-        [{ location_code: 'faxlc' }, 'off,fax'],
+        [{ location_code: 'faxlc' }, 'off,faxc'],
         [{ location_code: 'faxlcn' }, 'off,fax'],
+        [{ location_code: 'ave', barcode: 'CU...' }, 'off,avec'],
+        [{ location_code: 'avelc', barcode: 'CU...' }, 'off,avec'],
+        [{ location_code: 'fax', barcode: 'CU...' }, 'off,faxc'],
+        [{ location_code: 'faxlc', barcode: 'CU...' }, 'off,faxc'],
         [{ location_code: 'war', barcode: 'CU...' }, 'off,war'],
         [{ location_code: 'war,anx2' }, 'off,war'],
         # SESSL General Collections
