@@ -96,6 +96,7 @@ RSpec.describe Bibdata::OffsiteLocationFlipper do
         [{ location_code: 'ave,anx2' }, 'off,ave'],
         [{ location_code: 'avelc' }, 'off,avec'],
         [{ location_code: 'avelcn' }, 'off,ave'],
+        [{ location_code: 'sho', barcode: 'AR...' }, 'off,ave'],
         [{ location_code: 'fax', barcode: 'AR...' }, 'off,fax'],
         [{ location_code: 'fax,anx2' }, 'off,fax'],
         [{ location_code: 'faxlc' }, 'off,faxc'],
@@ -126,6 +127,7 @@ RSpec.describe Bibdata::OffsiteLocationFlipper do
         [{ location_code: 'sci,anx' }, 'off,sci'],
         [{ location_code: 'sci,anx2' }, 'off,sci'],
         [{ location_code: 'sci,ref' }, 'off,sci'],
+        [{ location_code: 'sci,res' }, 'off,sci'],
         [{ location_code: 'swx' }, 'off,swx'],
         [{ location_code: 'swx,anx2' }, 'off,swx'],
         # SESSL Obsolete Locations
@@ -163,6 +165,7 @@ RSpec.describe Bibdata::OffsiteLocationFlipper do
         [{ location_code: 'mil,res', barcode: 'CU...' }, 'off,glx'],
         [{ location_code: 'mil,anx2' }, 'off,glx'],
         [{ location_code: 'sls' }, 'off,glx'],
+        [{ location_code: 'sho', barcode: 'CU...' }, 'off,glx'],
         [{ location_code: 'pren' }, 'off,glx'],
         [{ location_code: 'pren,fol' }, 'off,glx'],
         # Butler Media Collection

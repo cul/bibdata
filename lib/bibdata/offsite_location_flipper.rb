@@ -82,6 +82,7 @@ module Bibdata::OffsiteLocationFlipper
     return off('ave') if location_code == 'ave,anx2'
     return off('avec') if location_code == 'avelc'
     return off('ave') if location_code == 'avelcn'
+    return off('ave') if location_code == 'sho' && barcode.start_with?('AR')
     return off('fax') if location_code == 'fax' && barcode.start_with?('AR')
     return off('fax') if location_code == 'fax,anx2'
     return off('faxc') if location_code == 'faxlc'
@@ -113,6 +114,7 @@ module Bibdata::OffsiteLocationFlipper
     return off('sci') if location_code == 'sci,anx'
     return off('sci') if location_code == 'sci,anx2'
     return off('sci') if location_code == 'sci,ref'
+    return off('sci') if location_code == 'sci,res'
     return off('swx') if location_code == 'swx'
     return off('swx') if location_code == 'swx,anx2'
 
@@ -152,6 +154,7 @@ module Bibdata::OffsiteLocationFlipper
     return off('glx') if location_code == 'mil,res' && barcode.start_with?('CU')
     return off('glx') if location_code == 'mil,anx2'
     return off('glx') if location_code == 'sls'
+    return off('glx') if location_code == 'sho' && barcode.start_with?('CU')
     return off('glx') if location_code == 'pren'
     return off('glx') if location_code == 'pren,fol'
 
