@@ -174,6 +174,7 @@ module Bibdata::OffsiteLocationFlipper
     return off('eax') if location_code == 'eax,anx2'
     return off('eax') if location_code == 'eax,tib'
     return off('eax') if location_code == 'eax,sky'
+    return off('eax') if location_code == 'eax,ref'
     return off('eax') if location_code == 'leh,tib'
     return off('eal') if location_code == 'pren,eal'
     return off('eax') if location_code == 'pren,eax'

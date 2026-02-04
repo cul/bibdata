@@ -182,6 +182,7 @@ RSpec.describe Bibdata::OffsiteLocationFlipper do
         [{location_code: 'eax,anx2' }, 'off,eax'],
         [{location_code: 'eax,tib' }, 'off,eax'],
         [{location_code: 'eax,sky' }, 'off,eax'],
+        [{location_code: 'eax,ref' }, 'off,eax'],
         [{location_code: 'leh,tib' }, 'off,eax'],
         [{location_code: 'pren,eal' }, 'off,eal'],
         [{location_code: 'pren,eax' }, 'off,eax'],
