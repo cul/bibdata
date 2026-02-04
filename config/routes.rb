@@ -23,8 +23,7 @@ Rails.application.routes.draw do
   # Make sure that the resque user restriction below is AFTER `devise_for :users`
   resque_web_constraint = lambda do |request|
     current_user = request.env['warden'].user
-    current_user.present? && current_user.respond_to?(:admin?) && current_user.admin?
-    true
+    current_user.present?
   end
   constraints resque_web_constraint do
     mount Resque::Server.new, at: '/resque'
