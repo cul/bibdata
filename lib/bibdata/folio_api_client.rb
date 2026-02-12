@@ -140,7 +140,10 @@ class Bibdata::FolioApiClient < FolioApiClient # rubocop:disable Metrics/ClassLe
   # Retry an operation muliple times if we run into an optimistic locking scenario due to an outdated record version.
   # This is indicated by a Faraday::ConflictError during a request.
   def with_conflict_error_retry(&block)
-    Retriable.retriable(on: Faraday::ConflictError, tries: 3, base_interval: 3, multiplier: 1, &block)
+    Retriable.retriable(
+      on: [Faraday::ConflictError, Net::ReadTimeout], tries: 3, base_interval: 3, multiplier: 1,
+      &block
+    )
   end
 end
 # rubocop:enable Metrics/MethodLength,Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
