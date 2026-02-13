@@ -70,7 +70,7 @@ group :development, :test do
   gem "simplecov", require: false
 
   # For ActiveRecord, use sqlite for dev/test databases and mysql for deployed server databases
-  gem 'sqlite3', '~> 2.8'
+  gem 'sqlite3', '~> 2.9'
 end
 
 group :development do
