@@ -75,7 +75,7 @@ end
 
 group :development do
   # Capistrano for deployment (per https://capistranorb.com/documentation/getting-started/installation/)
-  gem "capistrano", "~> 3.19.2", require: false
+  gem "capistrano", "~> 3.20.0", require: false
   gem "capistrano-cul", require: false # common set of tasks shared across cul apps
   gem "capistrano-rails", "~> 1.4", require: false # for compiling rails assets
   gem "capistrano-passenger", "~> 0.1", require: false # allows restart passenger workers
