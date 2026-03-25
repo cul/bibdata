@@ -2,6 +2,10 @@
 
 require 'resque/server'
 
+# We do NOT allow a literal "/".  It must be supplied as a "%25" URL-encoded character instead.
+# We do NOT allow a literal " ".  It must be supplied as a "%20" URL-encoded character instead.
+BARCODE_REGEX = /[a-zA-Z0-9-.$+%]+/
+
 Rails.application.routes.draw do
   devise_for :users, controllers: { sessions: 'users/sessions', omniauth_callbacks: 'users/omniauth_callbacks' }
   devise_scope :user do
@@ -9,8 +13,8 @@ Rails.application.routes.draw do
     delete '/users/sign_out', to: 'users/sessions#destroy'
   end
 
-  get 'barcode/:barcode/query' => 'barcode#query'
-  post 'barcode/:barcode/update' => 'barcode#update'
+  get 'barcode/:barcode/query' => 'barcode#query', constraints: { barcode: BARCODE_REGEX }
+  post 'barcode/:barcode/update' => 'barcode#update', constraints: { barcode: BARCODE_REGEX }
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
