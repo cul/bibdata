@@ -2,14 +2,24 @@
 
 class BarcodeController < ApplicationController
   before_action :authenticate, only: [:update]
+  before_action :validate_barcode, only: [:query, :update]
+
   skip_before_action :verify_authenticity_token, only: [:update] # No need for CSRF token for API token auth endpoint
 
   rescue_from Faraday::Error, with: :handle_faraday_error
   rescue_from Bibdata::Exceptions::UnresolvableHoldingsPermanentLocationError,
               with: :unresolvable_holdings_location_error
 
+  # See https://en.wikipedia.org/wiki/Code_39 for more information about allowed barcode characters.
+  # Note: Even though Code 39 supports the characters "/" and " ", we expect those characters to be supplied in the URL
+  # as HTML entities.  "/" becomes "%2F".  " " becomes "%20".
+  # We only expect a possible special character to be at the end of the string. In some cases like "-" or "." the final
+  # character can be expressed as the original character values, but some characters must be expressed as html entitites
+  # (like "%20") for them to be considered a valid URL.
+  VALID_BARCODE_REGEX = /[a-zA-Z0-9]+([-.$+]|%[a-zA-Z0-9]{2})?/
+
   def query
-    barcode = params[:barcode] # Example: 'CU23392169'
+    barcode = query_or_update_params[:barcode] # Example: 'CU23392169'
     marc_record = nil
     duration = Benchmark.measure do
       marc_record = Bibdata::Scsb.merged_marc_record_for_barcode(barcode, flip_location: false)
@@ -24,7 +34,7 @@ class BarcodeController < ApplicationController
   end
 
   def update
-    barcode = params[:barcode] # Example: 'CU23392169'
+    barcode = query_or_update_params[:barcode] # Example: 'CU23392169'
     marc_record = nil
     duration = Benchmark.measure do
       marc_record = Bibdata::Scsb.merged_marc_record_for_barcode(barcode, flip_location: true)
@@ -40,10 +50,18 @@ class BarcodeController < ApplicationController
 
   private
 
+  def query_or_update_params
+    params.permit(:barcode)
+  end
+
   def authenticate
     authenticate_or_request_with_http_token do |token, _options|
       ActiveSupport::SecurityUtils.secure_compare(token, Rails.application.config.bibdata['barcode_update_api_token'])
     end
+  end
+
+  def validate_barcode
+    render_not_found unless VALID_BARCODE_REGEX.match?(query_or_update_params[:barcode])
   end
 
   def render_not_found(barcode)

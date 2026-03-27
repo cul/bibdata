@@ -2,7 +2,8 @@ require 'rails_helper'
 
 RSpec.describe "Barcodes", type: :request do
   let(:valid_barcode) { "CU12345678" }
-  let(:invalid_barcode) { "not-valid" }
+  let(:invalid_format_barcode) { "!not-valid!" }
+  let(:valid_format_but_unresolvable_barcode) { "0000000000" }
   let(:marc_record) { double(MARC::Record) }
   let(:xml_response) do
     %{
@@ -18,7 +19,7 @@ RSpec.describe "Barcodes", type: :request do
   end
 
   before do
-    # merged_marc_record_for_barcode will return nil by default
+    # merged_marc_record_for_barcode will return nil by default (as if the barcode cannot be resolved to an existing record)
     allow(Bibdata::Scsb).to receive(:merged_marc_record_for_barcode).and_return(nil)
     # merged_marc_record_for_barcode will return a marc record for a valid barcode
     allow(Bibdata::Scsb).to receive(:merged_marc_record_for_barcode).with(valid_barcode, flip_location: flip_location).and_return(marc_record)
@@ -38,10 +39,16 @@ RSpec.describe "Barcodes", type: :request do
       expect(response.body).to eq(xml_response)
     end
 
-    it "returns a 404 Not Found status, plus informative message, for an invalid barcode" do
-      get "/barcode/#{invalid_barcode}/query"
+    it "returns a 404 Not Found status, plus informative message, for an invalid format barcode" do
+      get "/barcode/#{invalid_format_barcode}/query"
       expect(response).to have_http_status(:not_found)
-      expect(response.body).to eq("Barcode #{invalid_barcode} was not found.")
+      expect(response.body).to eq("Barcode #{invalid_format_barcode} was not found.")
+    end
+
+    it "returns a 404 Not Found status, plus informative message, for a valid format barcode that cannot be resolved to a record" do
+      get "/barcode/#{valid_format_but_unresolvable_barcode}/query"
+      expect(response).to have_http_status(:not_found)
+      expect(response.body).to eq("Barcode #{valid_format_but_unresolvable_barcode} was not found.")
     end
 
     [Faraday::Error, Faraday::UnprocessableEntityError, Faraday::UnauthorizedError].each do |faraday_error_class|
@@ -99,10 +106,16 @@ RSpec.describe "Barcodes", type: :request do
         expect(response.body).to eq(xml_response)
       end
 
-      it "returns a 404 Not Found status, plus informative message, for an invalid barcode" do
-        post "/barcode/#{invalid_barcode}/update", params: {}, headers: headers_with_valid_authorization_token
+      it "returns a 404 Not Found status, plus informative message, for an invalid format barcode" do
+        post "/barcode/#{invalid_format_barcode}/update", params: {}, headers: headers_with_valid_authorization_token
         expect(response).to have_http_status(:not_found)
-        expect(response.body).to eq("Barcode #{invalid_barcode} was not found.")
+        expect(response.body).to eq("Barcode #{invalid_format_barcode} was not found.")
+      end
+
+      it "returns a 404 Not Found status, plus informative message, for a valid format barcode that cannot be resolved to a record" do
+        post "/barcode/#{valid_format_but_unresolvable_barcode}/update", params: {}, headers: headers_with_valid_authorization_token
+        expect(response).to have_http_status(:not_found)
+        expect(response.body).to eq("Barcode #{valid_format_but_unresolvable_barcode} was not found.")
       end
 
       [Faraday::Error, Faraday::UnprocessableEntityError, Faraday::UnauthorizedError].each do |faraday_error_class|
