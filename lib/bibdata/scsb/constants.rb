@@ -43,7 +43,10 @@ module Bibdata::Scsb::Constants
     'utmrl',
     'off,utrml',
     'vmc',
-    'off,vmc'
+    'off,vmc',
+    # Law library
+    'lawspofr',
+    'lawcdofr'
   ].freeze
 
   CGD_PRIVATE_BARCODE_PREFIXES = [

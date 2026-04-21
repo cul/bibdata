@@ -18,6 +18,11 @@ module Bibdata::OffsiteLocationFlipper
     # "4off"-ending locations are applied with design and intention and this is what they always mean.
     return off(location_code[0...-4]) if location_code.end_with?('4off')
 
+    # Law (these location flip rules are intentional no-op rules because they "flip" a value to the same value)
+    return 'lawspofr' if location_code == 'lawspofr' # This no-op rule ensures that this location is NOT flipped
+    return 'lawcdofr' if location_code == 'lawcdofr' # This no-op rule ensures that this location is NOT flipped
+    return 'lawgnofr' if location_code == 'lawgnofr' # This no-op rule ensures that this location is NOT flipped
+
     # Variants that should be reviewed in the future, but we will keep them in place for now
     return off('avda') if location_code == 'avda' && barcode.start_with?('AD')
     return off('glx') if location_code == 'glx' && barcode.start_with?('CU', 'CR')

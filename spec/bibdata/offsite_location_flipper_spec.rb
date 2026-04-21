@@ -41,6 +41,11 @@ RSpec.describe Bibdata::OffsiteLocationFlipper do
 
     context "specific location flipping rules" do
       [
+        # Law (these location flip rules are intentional no-op rules because they "flip" a value to the same value)
+        [{ location_code: 'lawspofr' }, 'lawspofr'],
+        [{ location_code: 'lawcdofr' }, 'lawcdofr'],
+        [{ location_code: 'lawgnofr' }, 'lawgnofr'],
+
         # Variants that should be reviewed in the future, but we will keep them in place for now
         [{ location_code: 'avda', barcode: 'AD...' }, 'off,avda'],
         [{ location_code: 'glx', barcode: 'CU...' }, 'off,glx'],
