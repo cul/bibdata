@@ -311,4 +311,68 @@ RSpec.describe Bibdata::Scsb do
       expect(Bibdata::Scsb.location_change_logger).to equal(logger)
     end
   end
+
+  describe '.collection_group_designation_for_item' do
+    it "falls back to CGD shared when no other rules match" do
+      folio_item_record = instance_double('Item Record')
+      allow(folio_item_record).to receive(:[]).with('barcode').and_return("ZZ1234567")
+      expect(
+        described_class.collection_group_designation_for_item(folio_item_record, 'example-location', '')
+      ).to eq(Bibdata::Scsb::Constants::CGD_SHARED)
+    end
+
+    context "CGD for a barcode on our private barcode prefix list" do
+      Bibdata::Scsb::Constants::CGD_PRIVATE_BARCODE_PREFIXES.each do |private_barcode_prefix|
+        it "returns 'Private' for private barcode prefix #{private_barcode_prefix}" do
+          folio_item_record = instance_double('Item Record')
+          allow(folio_item_record).to receive(:[]).with('barcode').and_return("#{private_barcode_prefix}1234567")
+          expect(
+            described_class.collection_group_designation_for_item(folio_item_record, 'example-location', 'any 876 $x value')
+          ).to eq(Bibdata::Scsb::Constants::CGD_PRIVATE)
+        end
+      end
+    end
+
+    context "CGD for a location code on our private location code list" do
+      let(:folio_item_record) {
+        item_rec = instance_double('Item Record')
+        allow(item_rec).to receive(:[]).with('barcode').and_return('non-private-barcode')
+        item_rec
+      }
+
+      Bibdata::Scsb::Constants::CGD_PRIVATE_LOCATION_CODES.each do |private_location_code|
+        it "returns 'Private' for private location code #{private_location_code}" do
+          expect(
+            described_class.collection_group_designation_for_item(folio_item_record, private_location_code, 'any 876 $x value')
+          ).to eq(Bibdata::Scsb::Constants::CGD_PRIVATE)
+        end
+      end
+    end
+
+    context "when the instance record MARC data has an 876 $x value of 'Private'" do
+      let(:folio_item_record) {
+        item_rec = instance_double('Item Record')
+        allow(item_rec).to receive(:[]).with('barcode').and_return('non-private-barcode')
+        item_rec
+      }
+      it "returns 'Private'" do
+        expect(
+          described_class.collection_group_designation_for_item(folio_item_record, 'example-location', Bibdata::Scsb::Constants::CGD_PRIVATE)
+        ).to eq(Bibdata::Scsb::Constants::CGD_PRIVATE)
+      end
+    end
+
+    context "when the instance record MARC data has an 876 $x value of 'Committed'" do
+      let(:folio_item_record) {
+        item_rec = instance_double('Item Record')
+        allow(item_rec).to receive(:[]).with('barcode').and_return('non-private-barcode')
+        item_rec
+      }
+      it "returns 'Private'" do
+        expect(
+          described_class.collection_group_designation_for_item(folio_item_record, 'example-location', Bibdata::Scsb::Constants::CGD_COMMITTED)
+        ).to eq(Bibdata::Scsb::Constants::CGD_COMMITTED)
+      end
+    end
+  end
 end
