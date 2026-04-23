@@ -239,14 +239,19 @@ module Bibdata::Scsb
     if Bibdata::Scsb::Constants::CGD_PRIVATE_LOCATION_CODES.include?(holdings_permanent_location_code)
       return Bibdata::Scsb::Constants::CGD_PRIVATE
     end
-    if Bibdata::Scsb::Constants::CGD_PRIVATE_BARCODE_PREFIXES.include?(barcode)
+    if Bibdata::Scsb::Constants::CGD_PRIVATE_BARCODE_PREFIXES.find { |prefix| barcode.start_with?(prefix) }
       return Bibdata::Scsb::Constants::CGD_PRIVATE
     end
 
     # If none of the above conditions resulted in an early exit from this method,
-    # and the original marc record's 876 $x was 'Committed', then return a CGD value of 'Committed'.
-    if original_marc_record_876_x_value == Bibdata::Scsb::Constants::CGD_COMMITTED
+    # and the original marc record's 876 $x was 'Committed' or 'Private', then return the CGD value specified in 876 $x.
+    # This allows people to override CGD in special cases where the default behavior should be 'Shared',
+    # but certain exceptional records should be 'Committed' or 'Private'.
+    case original_marc_record_876_x_value
+    when Bibdata::Scsb::Constants::CGD_COMMITTED
       return Bibdata::Scsb::Constants::CGD_COMMITTED
+    when Bibdata::Scsb::Constants::CGD_PRIVATE
+      return Bibdata::Scsb::Constants::CGD_PRIVATE
     end
 
     Bibdata::Scsb::Constants::CGD_SHARED
@@ -286,7 +291,7 @@ module Bibdata::Scsb
       # - Shared
       # - Open (we always supply "Shared" for Open cases, and allow the SCSB system to change it to "Open" automatically
       #   when more than one copy of an item is held)
-      # - Committed (not something we use at this time)
+      # - Committed
       # - Uncommittable (not something we use at this time)
       MARC::Subfield.new('x', collection_group_designation),
 

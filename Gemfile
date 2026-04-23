@@ -55,6 +55,9 @@ gem 'omniauth-cul', git: 'https://github.com/cul/omniauth-cul', ref: 'improved-i
 gem "folio_api_client", "~> 0.5.1"
 # gem "folio_api_client", path: "../folio_api_client"
 
+# For cron tasks
+gem 'whenever', require: false
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"

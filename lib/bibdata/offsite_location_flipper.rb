@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/ModuleLength, Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength,Metrics/PerceivedComplexity
-module Bibdata::OffsiteLocationFlipper
+module Bibdata::OffsiteLocationFlipper # rubocop:disable Metrics/ModuleLength
   MATERIAL_TYPE_MICROFORMAT = 'Microformat'
 
   # For the given location_code and barcode, returns the "flipped" equivalent code that should be used
   # when an item has arrived at the ReCAP facility.
   # @return [String, nil] a "flipped" string location code, or nil if the given location_code cannot be mapped
   #                       to a "flipped" version.
+  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
   def self.location_code_to_recap_flipped_location_code(location_code, barcode, material_type)
     # If the location code starts with "off," no modification is needed.
     # Return the unmodified location code because it is already an offsite ReCAP code.
@@ -17,6 +17,11 @@ module Bibdata::OffsiteLocationFlipper
     # with "off,".  So "abc4off" becomes "off,abc".  None of the rules below will be evaluated.
     # "4off"-ending locations are applied with design and intention and this is what they always mean.
     return off(location_code[0...-4]) if location_code.end_with?('4off')
+
+    # Law (these location flip rules are intentional no-op rules because they "flip" a value to the same value)
+    return 'lawspofr' if location_code == 'lawspofr' # This no-op rule ensures that this location is NOT flipped
+    return 'lawcdofr' if location_code == 'lawcdofr' # This no-op rule ensures that this location is NOT flipped
+    return 'lawgnofr' if location_code == 'lawgnofr' # This no-op rule ensures that this location is NOT flipped
 
     # Variants that should be reviewed in the future, but we will keep them in place for now
     return off('avda') if location_code == 'avda' && barcode.start_with?('AD')
@@ -78,19 +83,15 @@ module Bibdata::OffsiteLocationFlipper
     end
 
     # Avery General Collections
-    return off('ave') if location_code == 'ave' && barcode.start_with?('AR')
+    return off('ave') if location_code == 'ave'
     return off('ave') if location_code == 'ave,anx2'
     return off('avec') if location_code == 'avelc'
     return off('ave') if location_code == 'avelcn'
     return off('ave') if location_code == 'sho' && barcode.start_with?('AR')
-    return off('fax') if location_code == 'fax' && barcode.start_with?('AR')
+    return off('fax') if location_code == 'fax'
     return off('fax') if location_code == 'fax,anx2'
     return off('faxc') if location_code == 'faxlc'
     return off('fax') if location_code == 'faxlcn'
-    return off('avec') if location_code == 'ave' && barcode.start_with?('CU')
-    return off('avec') if location_code == 'avelc' && barcode.start_with?('CU')
-    return off('faxc') if location_code == 'fax' && barcode.start_with?('CU')
-    return off('faxc') if location_code == 'faxlc' && barcode.start_with?('CU')
     return off('war') if location_code == 'war' && barcode.start_with?('CU')
     return off('war') if location_code == 'war,anx2'
 
@@ -157,6 +158,7 @@ module Bibdata::OffsiteLocationFlipper
     return off('glx') if location_code == 'sho' && barcode.start_with?('CU')
     return off('glx') if location_code == 'pren'
     return off('glx') if location_code == 'pren,fol'
+    return off('pat') if location_code == 'pat'
 
     # Butler Media Collection
     return off('bmc') if location_code == 'bmc'
@@ -210,10 +212,10 @@ module Bibdata::OffsiteLocationFlipper
     # If none of the above rules matched, return nil
     nil
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
 
   # Returns the given location code, prefixed with 'off,'
   def self.off(location_code)
     "off,#{location_code}"
   end
 end
-# rubocop:enable Metrics/ModuleLength, Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength,Metrics/PerceivedComplexity

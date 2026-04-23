@@ -44,7 +44,7 @@ RSpec.describe Bibdata::Scsb do
       end
     end
 
-    context "when the original record's bibliographic marc data has an 876 $x value of 'Committed'" do
+    context "CGD logic based on the item record's bibliographic record MARC data" do
       let(:barcode) { 'CU23392169' }
       let(:source_record) {
         record = JSON.parse(File.read(File.join(barcode_fixture_base_dir, "#{barcode}-source-record.json")))
@@ -57,7 +57,7 @@ RSpec.describe Bibdata::Scsb do
               'ind1' => ' ',
               'ind2'=> ' ',
               'subfields'=> [
-                { 'x' => 'Committed' }
+                { 'x' => value_876x }
               ]
             }
           }
@@ -65,6 +65,7 @@ RSpec.describe Bibdata::Scsb do
 
         record
       }
+
       let(:expected_xml) do
         marc_xml_string = File.read(File.join(barcode_fixture_base_dir, "#{barcode}-generated-scsb-marc-xml.xml"))
         xml_doc = Nokogiri::XML(marc_xml_string, &:noblanks)
@@ -72,7 +73,11 @@ RSpec.describe Bibdata::Scsb do
         xml_doc.xpath(
           '/marc:record/marc:datafield[@tag="876"]/marc:subfield[@code="x"]',
           'marc' => 'http://www.loc.gov/MARC21/slim'
-        ).first.content = Bibdata::Scsb::Constants::CGD_COMMITTED
+        ).first.content = expected_xml_876_x_value
+        xml_doc.xpath(
+          '/marc:record/marc:datafield[@tag="876"]/marc:subfield[@code="h"]',
+          'marc' => 'http://www.loc.gov/MARC21/slim'
+        ).first.content = expected_xml_876_h_value
         xml_doc.to_xml(indent: 2)
       end
 
@@ -84,10 +89,26 @@ RSpec.describe Bibdata::Scsb do
         allow(Bibdata::FolioApiClient.instance).to receive(:find_source_record).and_return(source_record)
       end
 
-      it "generates the expected xml, which has an 876 $x value of 'Committed'" do
-        marc_record = described_class.merged_marc_record_for_barcode(barcode, flip_location: false)
-        generated_xml = Nokogiri::XML(marc_record.to_xml.to_s, &:noblanks).to_xml(indent: 2)
-        expect(generated_xml).to eq(expected_xml)
+      context "when the instance record MARC data has an 876 $x value of 'Committed'" do
+        let(:value_876x) { Bibdata::Scsb::Constants::CGD_COMMITTED }
+        let(:expected_xml_876_x_value) { Bibdata::Scsb::Constants::CGD_COMMITTED }
+        let(:expected_xml_876_h_value) { Bibdata::Scsb::Constants::USE_RESTRICTION_BLANK }
+        it "generates the expected xml, which has an 876 $x value of 'Committed'" do
+          marc_record = described_class.merged_marc_record_for_barcode(barcode, flip_location: false)
+          generated_xml = Nokogiri::XML(marc_record.to_xml.to_s, &:noblanks).to_xml(indent: 2)
+          expect(generated_xml).to eq(expected_xml)
+        end
+      end
+
+      context "when the instance record MARC data has an 876 $x value of 'Private'" do
+        let(:value_876x) { Bibdata::Scsb::Constants::CGD_PRIVATE }
+        let(:expected_xml_876_x_value) { Bibdata::Scsb::Constants::CGD_PRIVATE }
+        let(:expected_xml_876_h_value) { Bibdata::Scsb::Constants::USE_RESTRICTION_SUPERVISED_USE }
+        it "generates the expected xml, which has an 876 $x value of 'Private'" do
+          marc_record = described_class.merged_marc_record_for_barcode(barcode, flip_location: false)
+          generated_xml = Nokogiri::XML(marc_record.to_xml.to_s, &:noblanks).to_xml(indent: 2)
+          expect(generated_xml).to eq(expected_xml)
+        end
       end
     end
 
@@ -288,6 +309,70 @@ RSpec.describe Bibdata::Scsb do
     it 'returns the same logger instance every time' do
       logger = Bibdata::Scsb.location_change_logger
       expect(Bibdata::Scsb.location_change_logger).to equal(logger)
+    end
+  end
+
+  describe '.collection_group_designation_for_item' do
+    it "falls back to CGD shared when no other rules match" do
+      folio_item_record = instance_double('Item Record')
+      allow(folio_item_record).to receive(:[]).with('barcode').and_return("ZZ1234567")
+      expect(
+        described_class.collection_group_designation_for_item(folio_item_record, 'example-location', '')
+      ).to eq(Bibdata::Scsb::Constants::CGD_SHARED)
+    end
+
+    context "CGD for a barcode on our private barcode prefix list" do
+      Bibdata::Scsb::Constants::CGD_PRIVATE_BARCODE_PREFIXES.each do |private_barcode_prefix|
+        it "returns 'Private' for private barcode prefix #{private_barcode_prefix}" do
+          folio_item_record = instance_double('Item Record')
+          allow(folio_item_record).to receive(:[]).with('barcode').and_return("#{private_barcode_prefix}1234567")
+          expect(
+            described_class.collection_group_designation_for_item(folio_item_record, 'example-location', 'any 876 $x value')
+          ).to eq(Bibdata::Scsb::Constants::CGD_PRIVATE)
+        end
+      end
+    end
+
+    context "CGD for a location code on our private location code list" do
+      let(:folio_item_record) {
+        item_rec = instance_double('Item Record')
+        allow(item_rec).to receive(:[]).with('barcode').and_return('non-private-barcode')
+        item_rec
+      }
+
+      Bibdata::Scsb::Constants::CGD_PRIVATE_LOCATION_CODES.each do |private_location_code|
+        it "returns 'Private' for private location code #{private_location_code}" do
+          expect(
+            described_class.collection_group_designation_for_item(folio_item_record, private_location_code, 'any 876 $x value')
+          ).to eq(Bibdata::Scsb::Constants::CGD_PRIVATE)
+        end
+      end
+    end
+
+    context "when the instance record MARC data has an 876 $x value of 'Private'" do
+      let(:folio_item_record) {
+        item_rec = instance_double('Item Record')
+        allow(item_rec).to receive(:[]).with('barcode').and_return('non-private-barcode')
+        item_rec
+      }
+      it "returns 'Private'" do
+        expect(
+          described_class.collection_group_designation_for_item(folio_item_record, 'example-location', Bibdata::Scsb::Constants::CGD_PRIVATE)
+        ).to eq(Bibdata::Scsb::Constants::CGD_PRIVATE)
+      end
+    end
+
+    context "when the instance record MARC data has an 876 $x value of 'Committed'" do
+      let(:folio_item_record) {
+        item_rec = instance_double('Item Record')
+        allow(item_rec).to receive(:[]).with('barcode').and_return('non-private-barcode')
+        item_rec
+      }
+      it "returns 'Private'" do
+        expect(
+          described_class.collection_group_designation_for_item(folio_item_record, 'example-location', Bibdata::Scsb::Constants::CGD_COMMITTED)
+        ).to eq(Bibdata::Scsb::Constants::CGD_COMMITTED)
+      end
     end
   end
 end
