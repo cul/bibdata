@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-class BarcodeUpdateErrorMailer < ApplicationMailer
+class DailyErrorMailer < ApplicationMailer
   def generate_email
     body_content = format_errors(params[:errors] || [])
 
     mail(
       to: Rails.configuration.bibdata['barcode_update_error_email_recipients'],
-      subject: "Bibdata Error - Problem with item record (barcode #{params[:barcode]})",
+      subject: "#{Date.current.strftime('%Y-%m-%d')} Bibdata Error Report",
       body: body_content,
       content_type: 'text/plain'
     )

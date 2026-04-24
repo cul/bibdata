@@ -167,8 +167,8 @@ RSpec.describe Bibdata::Scsb do
     end
 
     before do
-      allow(BarcodeUpdateErrorMailer).to receive(:with).with(
-        barcode: barcode, errors: an_instance_of(Array)
+      allow(DailyErrorMailer).to receive(:with).with(
+        errors: an_instance_of(Array)
       ).and_return(barcode_update_error_mailer)
     end
 
@@ -230,7 +230,7 @@ RSpec.describe Bibdata::Scsb do
         )
 
         expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Unable to map current location to flipped location/)
-        expect(BarcodeUpdateErrorMailer).to receive(:with).with(barcode: barcode, errors: [an_instance_of(String)])
+        expect(BarcodeUpdateError).to receive(:create).with(barcode: barcode, error_message: an_instance_of(String))
 
         Bibdata::Scsb.update_holdings_permanent_location_if_required!(
           barcode, current_holdings_permanent_location_code, material_type_name
@@ -249,56 +249,13 @@ RSpec.describe Bibdata::Scsb do
 
         expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Trying to change parent holdings permanent location/)
         expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/#{Regexp.escape(error_message)}/)
-        expect(BarcodeUpdateErrorMailer).to receive(:with).with(barcode: barcode, errors: [an_instance_of(String)])
+        expect(BarcodeUpdateError).to receive(:create).with(barcode: barcode, error_message: an_instance_of(String))
 
         Bibdata::Scsb.update_holdings_permanent_location_if_required!(
           barcode, current_holdings_permanent_location_code, material_type_name
         )
       end
     end
-
-    # describe '.send_notification_email_if_temporary_locations_found' do
-    #   it 'sends an email with one error if the item has a temporary location set' do
-    #     item_record['temporaryLocationId'] = 'some-location-id'
-    #     holdings_record.delete('temporaryLocationId')
-    #     expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Found unwanted item temporary location/)
-    #     expect(BarcodeUpdateErrorMailer).to receive(:with).with(barcode: barcode, errors: [an_instance_of(String)])
-    #     Bibdata::Scsb.send_notification_email_if_temporary_locations_found(
-    #       barcode, item_record, holdings_record
-    #     )
-    #   end
-
-    #   it "sends an email with one error if the item's parent holdings record has a temporary location set" do
-    #     item_record.delete('temporaryLocationId')
-    #     holdings_record['temporaryLocationId'] = 'some-location-id'
-    #     expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Found unwanted parent holdings temporary location/)
-    #     expect(BarcodeUpdateErrorMailer).to receive(:with).with(barcode: barcode, errors: [an_instance_of(String)])
-    #     Bibdata::Scsb.send_notification_email_if_temporary_locations_found(
-    #       barcode, item_record, holdings_record
-    #     )
-    #   end
-
-    #   it "sends an email with two errors if the item and its parent holdings record both have temporary locations set" do
-    #     item_record['temporaryLocationId'] = 'some-location-id'
-    #     holdings_record['temporaryLocationId'] = 'some-location-id'
-
-    #     expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Found unwanted item temporary location/)
-    #     expect(Bibdata::Scsb.location_change_logger).to receive(:unknown).with(/Found unwanted parent holdings temporary location/)
-    #     expect(BarcodeUpdateErrorMailer).to receive(:with).with(
-    #       barcode: barcode, errors: [an_instance_of(String), an_instance_of(String)]
-    #     )
-    #     Bibdata::Scsb.send_notification_email_if_temporary_locations_found(
-    #       barcode, item_record, holdings_record
-    #     )
-    #   end
-
-    #   it 'does not try to send an email if the item and its parent holdings record do not have temporary locations set' do
-    #     expect(BarcodeUpdateErrorMailer).not_to receive(:with)
-    #     Bibdata::Scsb.send_notification_email_if_temporary_locations_found(
-    #       barcode, item_record, holdings_record
-    #     )
-    #   end
-    # end
   end
 
   describe '.location_change_logger' do
