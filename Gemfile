@@ -42,7 +42,7 @@ gem 'retriable', '~> 3.1'
 # Resque/Redis (for queued jobs)
 gem 'redis', '~> 4.8' # NOTE: Updating the redis gem to v5 breaks the current redis namespace setup
 gem 'redis-namespace', '~> 1.11'
-gem 'resque', '~> 2.6'
+gem 'resque', '~> 3.0'
 
 # For authentication
 gem 'devise', '~> 4.9'
