@@ -102,7 +102,8 @@ module Bibdata::Scsb
                       "(location code: #{current_holdings_permanent_location_code}, barcode: #{barcode}, "\
                       "material type: #{material_type_name}).  Maybe a new mapping rule is needed?"
       self.location_change_logger.unknown("#{barcode}: #{error_message}")
-      BarcodeUpdateErrorMailer.with(barcode: barcode, errors: [error_message]).generate_email.deliver
+
+      BarcodeUpdateError.create(barcode: barcode, error_message: error_message)
       return
     end
 
@@ -139,31 +140,10 @@ module Bibdata::Scsb
     # We don't need the error to interrupt the rest of the overall process, and we'll
     # intentionally leave the holdings location unmodified.
     self.location_change_logger.unknown("Barcode #{barcode}: #{e.message}")
-    BarcodeUpdateErrorMailer.with(barcode: barcode, errors: [e.message]).generate_email.deliver
+
+    BarcodeUpdateError.create(barcode: barcode, error_message: e.message)
   end
   # rubocop:enable Metrics/AbcSize
-
-  # def self.send_notification_email_if_temporary_locations_found(
-  #   barcode, item_record, holdings_record
-  # )
-  #   temporary_location_notification_messages = []
-  #   if item_record['temporaryLocationId'].present?
-  #     error_message = 'Found unwanted item temporary location.'
-  #     self.location_change_logger.unknown("#{barcode}: #{error_message}")
-  #     temporary_location_notification_messages << error_message
-  #   end
-  #   if holdings_record['temporaryLocationId'].present?
-  #     error_message = 'Found unwanted parent holdings temporary location.'
-  #     self.location_change_logger.unknown("#{barcode}: #{error_message}")
-  #     temporary_location_notification_messages << error_message
-  #   end
-
-  #   return if temporary_location_notification_messages.empty?
-
-  #   BarcodeUpdateErrorMailer.with(
-  #     barcode: barcode, errors: temporary_location_notification_messages
-  #   ).generate_email.deliver
-  # end
 
   # Returns the value if present, otherwise returns nil.
   def self.get_original_876_x_value(marc_record)

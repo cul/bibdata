@@ -32,10 +32,9 @@ namespace :bibdata do
       Rails.env = ENV['RAILS_ENV']
 
       # puts "setting up test db...\n"
-      Rake::Task['db:environment:set'].invoke
-      Rake::Task['db:drop'].invoke
-      Rake::Task['db:create'].invoke
-      Rake::Task['db:migrate'].invoke
+      Rake::Task['db:drop'].execute
+      Rake::Task['db:create'].execute
+      Rake::Task['db:migrate'].execute
       begin
         Rake::Task['bibdata:rspec'].invoke
       rescue SystemExit => e

@@ -10,7 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_26_191240) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_22_043811) do
+  create_table "barcode_update_errors", force: :cascade do |t|
+    t.string "barcode", null: false
+    t.string "error_message", null: false
+    t.boolean "notification_sent", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["barcode", "created_at"], name: "index_barcode_update_errors_on_barcode_and_created_at"
+    t.index ["barcode"], name: "index_barcode_update_errors_on_barcode"
+    t.index ["notification_sent", "created_at"], name: "idx_on_notification_sent_created_at_c00c08f1c9"
+    t.index ["notification_sent"], name: "index_barcode_update_errors_on_notification_sent"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.integer "sign_in_count", default: 0, null: false
