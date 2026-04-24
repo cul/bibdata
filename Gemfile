@@ -37,7 +37,7 @@ gem 'nokogiri', '~> 1.18', '>= 1.18.10', force_ruby_platform: true
 gem "rainbow", "~> 3.0"
 
 # Retriable for retrying operations in response to specific exceptions
-gem 'retriable', '~> 3.1'
+gem 'retriable', '~> 3.4'
 
 # Resque/Redis (for queued jobs)
 gem 'redis', '~> 4.8' # NOTE: Updating the redis gem to v5 breaks the current redis namespace setup
