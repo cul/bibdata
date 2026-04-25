@@ -39,8 +39,12 @@ module Bibdata
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
-    # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    # Rails will use the Eastern time zone
+    config.time_zone = 'Eastern Time (US & Canada)'
+    # Database will store dates in UTC (which is the rails default behavior)
+    config.active_record.default_timezone = :utc
 
     # Load custom configs
     config.bibdata = config_for(:bibdata)
