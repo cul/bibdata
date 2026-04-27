@@ -55,7 +55,7 @@ module Bibdata::Scsb::Constants
     /^HX/,
     /^UA/,
     /^UT/,
-    %r{[0-9]{13}[-.$/+% ]} # NOTE: This rule is temporary, and will be removed in the future. See: LIBSYS-8166
+    %r{^[0-9]{13}[-.$/+% ]$} # NOTE: This rule is temporary, and will be removed in the future. See: LIBSYS-8166
   ].freeze
 
   USE_RESTRICTION_IN_LIBRARY_USE = 'In Library Use'

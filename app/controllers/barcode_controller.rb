@@ -16,7 +16,7 @@ class BarcodeController < ApplicationController
   # We only expect a possible special character to be at the end of the string. In some cases like "-" or "." the final
   # character can be expressed as the original character values, but some characters must be expressed as html entitites
   # (like "%20") for them to be considered a valid URL.
-  VALID_BARCODE_REGEX = /[a-zA-Z0-9]+([-.$+]|%[a-zA-Z0-9]{2})?/
+  VALID_BARCODE_REGEX = %r{^[a-zA-Z0-9]+([-.$/+% ])?$}
 
   def query
     barcode = query_or_update_params[:barcode] # Example: 'CU23392169'
@@ -28,7 +28,7 @@ class BarcodeController < ApplicationController
     Rails.logger.info('Performance measurement: '\
                       "Request for /barcode/#{barcode}/query completed in #{duration.real} seconds.")
 
-    return render_not_found barcode if marc_record.nil?
+    return render_not_found(barcode) if marc_record.nil?
 
     render xml: Bibdata::MarcHelpers.render_marc_records_as_marc_collection_xml([marc_record])
   end
@@ -43,7 +43,7 @@ class BarcodeController < ApplicationController
     Rails.logger.info('Performance measurement: '\
                       "Request for /barcode/#{barcode}/update completed in #{duration.real} seconds.")
 
-    return render_not_found barcode if marc_record.nil?
+    return render_not_found(barcode) if marc_record.nil?
 
     render xml: Bibdata::MarcHelpers.render_marc_records_as_marc_collection_xml([marc_record])
   end
@@ -61,7 +61,9 @@ class BarcodeController < ApplicationController
   end
 
   def validate_barcode
-    render_not_found unless VALID_BARCODE_REGEX.match?(query_or_update_params[:barcode])
+    return if VALID_BARCODE_REGEX.match?(query_or_update_params[:barcode])
+
+    render_not_found(query_or_update_params[:barcode])
   end
 
   def render_not_found(barcode)
