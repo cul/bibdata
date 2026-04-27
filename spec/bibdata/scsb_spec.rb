@@ -278,11 +278,27 @@ RSpec.describe Bibdata::Scsb do
       ).to eq(Bibdata::Scsb::Constants::CGD_SHARED)
     end
 
-    context "CGD for a barcode on our private barcode prefix list" do
-      Bibdata::Scsb::Constants::CGD_PRIVATE_BARCODE_PREFIXES.each do |private_barcode_prefix|
-        it "returns 'Private' for private barcode prefix #{private_barcode_prefix}" do
+    context "CGD for a barcode that matches a private barcode pattern" do
+      [
+        'RS1111111', # /^RS/,
+        'AD1111111', # /^AD/,
+        'HX1111111', # /^HX/,
+        'UA1111111', # /^UA/,
+        'UT1111111', # /^UT/
+        'UT1111111', # /^UT/
+        # All Code 39 mod 43 format barcodes that end in an allowed special character: %r{[0-9]{13}[-.$/+% ]}
+        # NOTE: This rule is temporary, and will be removed in the future. See: LIBSYS-8166
+        '3500501177304-',
+        '3500501108257.',
+        '3500501152575$',
+        '3500500948411/',
+        '3500500741637+',
+        '3500501386461%',
+        '3500500836143 ',
+      ].each do |barcode|
+        it "returns 'Private' for barcode #{barcode}" do
           folio_item_record = instance_double('Item Record')
-          allow(folio_item_record).to receive(:[]).with('barcode').and_return("#{private_barcode_prefix}1234567")
+          allow(folio_item_record).to receive(:[]).with('barcode').and_return(barcode)
           expect(
             described_class.collection_group_designation_for_item(folio_item_record, 'example-location', 'any 876 $x value')
           ).to eq(Bibdata::Scsb::Constants::CGD_PRIVATE)

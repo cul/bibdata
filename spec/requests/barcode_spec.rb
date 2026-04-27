@@ -17,6 +17,13 @@ RSpec.describe "Barcodes", type: :request do
       </collection>
     }
   end
+  let(:headers_with_invalid_authorization_token) do
+    { 'Authorization' => "Bearer THIS_IS_AN_INVALID_TOKEN" }
+  end
+
+  let(:headers_with_valid_authorization_token) do
+    { 'Authorization' => "Bearer #{Rails.application.config.bibdata['barcode_update_api_token']}" }
+  end
 
   before do
     # merged_marc_record_for_barcode will return nil by default (as if the barcode cannot be resolved to an existing record)
@@ -73,10 +80,6 @@ RSpec.describe "Barcodes", type: :request do
   describe "POST /barcode/:barcode/update" do
     let(:flip_location) { true }
 
-    let(:headers_with_invalid_authorization_token) do
-      { 'Authorization' => "Bearer THIS_IS_AN_INVALID_TOKEN" }
-    end
-
     context "when the user does not supply an auth token" do
       it "returns a 401 unauthorized response when a token is not provided" do
         post "/barcode/#{valid_barcode}/update"
@@ -95,10 +98,6 @@ RSpec.describe "Barcodes", type: :request do
     end
 
     context "with a valid auth token" do
-      let(:headers_with_valid_authorization_token) do
-        { 'Authorization' => "Bearer #{Rails.application.config.bibdata['barcode_update_api_token']}" }
-      end
-
       it "returns a 200 OK response for a valid barcode" do
         post "/barcode/#{valid_barcode}/update", params: {}, headers: headers_with_valid_authorization_token
         expect(response).to have_http_status(:ok)
@@ -135,6 +134,51 @@ RSpec.describe "Barcodes", type: :request do
         expect(response).to have_http_status(:internal_server_error)
         expect(response.body).to eq("Unable to resolve the holdings permanent location for this record.")
       end
+    end
+  end
+
+  describe "Code 39 mod 43 barcode handling" do
+    let(:flip_location) { false }
+    let(:invalid_format_code39_mod_43_barcode) { '3500501177304*' }
+
+    {
+      '3500501177304-' => '3500501177304-',
+      '3500501108257.' => '3500501108257.',
+      '3500501152575$' => '3500501152575$',
+      '3500500948411%2F' => '3500500948411/',
+      '3500500741637+' => '3500500741637+',
+      '3500501386461%25' => '3500501386461%',
+      '3500500836143%20' => '3500500836143 ',
+    }.each do |url_encoded_barcode, barcode|
+      context "the query endpoint" do
+        let(:valid_barcode) { barcode }
+        it "returns a 200 OK response for a valid Code 39 mod 43 barcode \"#{barcode}\" (See: LIBSYS-8144)" do
+          get "/barcode/#{url_encoded_barcode}/query"
+          expect(response).to have_http_status(:ok)
+          expect(response.content_type).to eq("application/xml; charset=utf-8")
+        end
+      end
+      context "the update endpoint" do
+        let(:valid_barcode) { barcode }
+        let(:flip_location) { true }
+        it "returns a 200 OK response for a valid Code 39 mod 43 barcode \"#{barcode}\" (See: LIBSYS-8144)" do
+          post "/barcode/#{url_encoded_barcode}/update", params: {}, headers: headers_with_valid_authorization_token
+          expect(response).to have_http_status(:ok)
+          expect(response.content_type).to eq("application/xml; charset=utf-8")
+        end
+      end
+    end
+
+    it "the query endpoint returns a 404 Not Found status, plus informative message, for an invalid Code 39 mod 43 barcode" do
+      get "/barcode/#{invalid_format_code39_mod_43_barcode}/query"
+      expect(response).to have_http_status(:not_found)
+      expect(response.body).to eq("Barcode #{invalid_format_code39_mod_43_barcode} was not found.")
+    end
+
+    it "the query endpoint returns a 404 Not Found status, plus informative message, for an invalid Code 39 mod 43 barcode" do
+      post "/barcode/#{invalid_format_code39_mod_43_barcode}/update", params: {}, headers: headers_with_valid_authorization_token
+      expect(response).to have_http_status(:not_found)
+      expect(response.body).to eq("Barcode #{invalid_format_code39_mod_43_barcode} was not found.")
     end
   end
 end
