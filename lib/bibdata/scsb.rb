@@ -219,7 +219,7 @@ module Bibdata::Scsb
     if Bibdata::Scsb::Constants::CGD_PRIVATE_LOCATION_CODES.include?(holdings_permanent_location_code)
       return Bibdata::Scsb::Constants::CGD_PRIVATE
     end
-    if Bibdata::Scsb::Constants::CGD_PRIVATE_BARCODE_PREFIXES.find { |prefix| barcode.start_with?(prefix) }
+    if Bibdata::Scsb::Constants::CGD_PRIVATE_BARCODE_PATTERNS.find { |pattern| barcode =~ pattern }
       return Bibdata::Scsb::Constants::CGD_PRIVATE
     end
 

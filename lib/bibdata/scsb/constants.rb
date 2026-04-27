@@ -49,12 +49,13 @@ module Bibdata::Scsb::Constants
     'lawcdofr'
   ].freeze
 
-  CGD_PRIVATE_BARCODE_PREFIXES = [
-    'RS',
-    'AD',
-    'HX',
-    'UA',
-    'UT'
+  CGD_PRIVATE_BARCODE_PATTERNS = [
+    /^RS/,
+    /^AD/,
+    /^HX/,
+    /^UA/,
+    /^UT/,
+    %r{[0-9]{13}[-.$/+% ]} # NOTE: This rule is temporary, and will be removed in the future. See: LIBSYS-8166
   ].freeze
 
   USE_RESTRICTION_IN_LIBRARY_USE = 'In Library Use'
