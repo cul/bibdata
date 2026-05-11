@@ -6,7 +6,7 @@ class DailyErrorMailer < ApplicationMailer
 
     mail(
       to: Rails.configuration.bibdata['barcode_update_error_email_recipients'],
-      subject: "#{Date.current.strftime('%Y-%m-%d')} Bibdata Error Report",
+      subject: "#{Date.current.strftime('%Y-%m-%d')} Bibdata Error Report (#{Rails.env})",
       body: body_content,
       content_type: 'text/plain'
     )
